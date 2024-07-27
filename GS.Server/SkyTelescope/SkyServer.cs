@@ -623,10 +623,8 @@ namespace GS.Server.SkyTelescope
 
         /// <summary>
         /// Pulse reporting to driver
-        /// Alt Az uses both axes so always synchronous pulse guiding on one of Ra or Dec
         /// </summary>
-        public static bool IsPulseGuiding => (IsPulseGuidingDec || IsPulseGuidingRa)
-                                                && (SkySettings.AlignmentMode != AlignmentModes.algAltAz);
+        public static bool IsPulseGuiding => (IsPulseGuidingDec || IsPulseGuidingRa);
 
         /// <summary>
         /// Checks if the auto home async process is running
@@ -1713,16 +1711,17 @@ namespace GS.Server.SkyTelescope
         }
 
         /// <summary>
-        /// Performs a pulse guiding slew of the axes to target
+        /// Performs a precision slew of axes to pulse target defined by RaDec predictor
         /// </summary>
-        private static void SimPulseGoto()
+        /// <param name="duration">Pulse guide time in milliseconds</param>
+        private static void SimPulseGoto(int duration)
         {
             var maxtries = 0;
             double[] deltaDegree = { 0.0, 0.0 };
             double[] gotoPrecision = { ConvertStepsToDegrees(2, 0), ConvertStepsToDegrees(2, 1) };
             const double milliSeconds = 0.001;
             var deltaTime = 75 * milliSeconds; // 75mS for simulator slew
-
+            var pulseStartTime = HiResDateTime.UtcNow;
             while (true)
             {
                 if (maxtries > 5) { break; }
@@ -1769,14 +1768,14 @@ namespace GS.Server.SkyTelescope
                 }
 
                 // track movement until axes are stopped
-                var stopwatch1 = Stopwatch.StartNew();
+                var stopwatch = Stopwatch.StartNew();
 
                 var axis1stopped = false;
                 var axis2stopped = false;
 
                 if (SlewState == SlewType.SlewNone) break;
 
-                while (stopwatch1.Elapsed.TotalMilliseconds < 1000)
+                while (stopwatch.Elapsed.TotalMilliseconds < 1000)
                 {
                     if (SlewState == SlewType.SlewNone) { break; }
                     Thread.Sleep(20);
@@ -1795,8 +1794,19 @@ namespace GS.Server.SkyTelescope
                     }
                     if (axis1stopped && axis2stopped) { break; }
                 }
-                stopwatch1.Stop();
-                deltaTime = stopwatch1.Elapsed.Milliseconds * milliSeconds;
+                stopwatch.Stop();
+            }
+            // pulse movement finished so resume tracking
+            SetTracking();
+            // wait for pulse duration so completion variable IsPulseGuiding remains true 
+            var waitTime = (int)(pulseStartTime.AddMilliseconds(duration) - HiResDateTime.UtcNow).TotalMilliseconds;
+            if (waitTime > 0)
+            {
+                var stopwatch = Stopwatch.StartNew();
+                while (stopwatch.Elapsed.TotalMilliseconds < waitTime)
+                {
+                    if (stopwatch.ElapsedMilliseconds % 200 == 0) { UpdateSteps(); } // Process positions while waiting
+                }
             }
         }
 
@@ -2284,10 +2294,11 @@ namespace GS.Server.SkyTelescope
             return returnCode;
         }
 
-    /// <summary>
-    /// Performs a precision slew of axes to pulse target defined by RaDec predictor
-    /// </summary>
-    private static void SkyPulseGoto()
+        /// <summary>
+        /// Performs a precision slew of axes to pulse target defined by RaDec predictor
+        /// </summary>
+        /// <param name="duration">Pulse guide time in milliseconds</param>
+        private static void SkyPulseGoto(int duration)
         {
             var maxtries = 0;
             double[] deltaDegree = { 0.0, 0.0 };
@@ -2297,6 +2308,7 @@ namespace GS.Server.SkyTelescope
             // double[] gotoPrecision = { ConvertStepsToDegrees(2, 0), ConvertStepsToDegrees(2, 1) };
             double[] gotoPrecision = { SkySettings.GotoPrecision, SkySettings.GotoPrecision };
             long loopTime = 400;
+            var pulseStartTime = HiResDateTime.UtcNow;
             while (true)
             {
                 // start loop timer
@@ -2373,6 +2385,18 @@ namespace GS.Server.SkyTelescope
                 }
                 loopTimer.Stop();
                 loopTime = loopTimer.ElapsedMilliseconds;
+            }
+            // pulse movement finished so resume tracking
+            SetTracking();
+            // wait for pulse duration so completion variable IsPulseGuiding remains true 
+            var waitTime = (int)(pulseStartTime.AddMilliseconds(duration) - HiResDateTime.UtcNow).TotalMilliseconds;
+            if (waitTime > 0)
+            {
+                var stopwatch = Stopwatch.StartNew();
+                while (stopwatch.Elapsed.TotalMilliseconds < waitTime)
+                {
+                    if (stopwatch.ElapsedMilliseconds % 200 == 0) { UpdateSteps(); } // Process positions while waiting
+                }
             }
         }
 
@@ -4905,6 +4929,16 @@ namespace GS.Server.SkyTelescope
         /// </summary>
         /// <param name="direction">GuideDirections</param>
         /// <param name="duration">in milliseconds</param>
+        public static void PulseGuideAsync(GuideDirections direction, int duration)
+        {
+            Task.Run(() => PulseGuide(direction, duration));
+        }
+        
+        /// <summary>
+        /// Pulse commands
+        /// </summary>
+        /// <param name="direction">GuideDirections</param>
+        /// <param name="duration">in milliseconds</param>
         public static void PulseGuide(GuideDirections direction, int duration)
         {
             if (!IsMountRunning) { throw new Exception("Mount not running"); }
@@ -4970,13 +5004,13 @@ namespace GS.Server.SkyTelescope
                                     pulseEntry.StartTime = HiResDateTime.UtcNow;
                                 }
                                 // execute pulse
-                                SimPulseGoto();
+                                SimPulseGoto(duration);
+                                IsPulseGuidingDec = false;
                                 // log and graph pulse
                                 if (MonitorPulse)
                                 {
                                     MonitorLog.LogToMonitor(pulseEntry);
                                 }
-                                SetTracking();
 
                             }
                             else
@@ -5006,13 +5040,13 @@ namespace GS.Server.SkyTelescope
                                     pulseEntry.StartTime = HiResDateTime.UtcNow;
                                 }
                                 // execute pulse
-                                SkyPulseGoto();
+                                SkyPulseGoto(duration);
+                                IsPulseGuidingDec = false;
                                 // log and graph pulse
                                 if (MonitorPulse)
                                 {
                                     MonitorLog.LogToMonitor(pulseEntry);
                                 }
-                                SetTracking();
                             }
                             else
                             {
@@ -5070,13 +5104,13 @@ namespace GS.Server.SkyTelescope
                                     pulseEntry.StartTime = HiResDateTime.UtcNow;
                                 }
                                 // execute pulse
-                                SkyPulseGoto();
+                                SimPulseGoto(duration);
+                                IsPulseGuidingRa = false;
                                 // log and graph pulse
                                 if (MonitorPulse)
                                 {
                                     MonitorLog.LogToMonitor(pulseEntry);
                                 }
-                                SetTracking();
                             }
                             else
                             {
@@ -5102,13 +5136,13 @@ namespace GS.Server.SkyTelescope
                                     pulseEntry.StartTime = HiResDateTime.UtcNow;
                                 }
                                 // execute pulse
-                                SkyPulseGoto();
+                                SkyPulseGoto(duration);
                                 // log and graph pulse
+                                IsPulseGuidingRa = false;
                                 if (MonitorPulse)
                                 {
                                     MonitorLog.LogToMonitor(pulseEntry);
                                 }
-                                SetTracking();
                             }
                             else
                             {

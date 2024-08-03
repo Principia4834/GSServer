@@ -768,16 +768,16 @@ namespace GS.Server.SkyTelescope
             }
         }
 
-        private static bool _atPark;
+        private static DictionaryByEnum<bool, AlignmentModes> _atPark = new DictionaryByEnum<bool, AlignmentModes>();
         public static bool AtPark
         {
-            get => _atPark;
+            get => _atPark[SkySettings.AlignmentMode];
             set
             {
-                if (_atPark == value) return;
-                _atPark = value;
-                Properties.SkyTelescope.Default.AtPark = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (_atPark[SkySettings.AlignmentMode] == value) return;
+                _atPark[SkySettings.AlignmentMode] = value;
+                Properties.SkyTelescope.Default.AtPark = JsonConvert.SerializeObject(_atPark);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{SkySettings.AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
@@ -1092,30 +1092,30 @@ namespace GS.Server.SkyTelescope
             }
         }
 
-        private static double _homeAxisX = double.NaN;
+        private static DictionaryByEnum<double, AlignmentModes> _homeAxisX = new DictionaryByEnum<double, AlignmentModes>();
         public static double HomeAxisX
         {
-            get => _homeAxisX;
+            get => _homeAxisX[AlignmentMode];
             private set
             {
-                if (Math.Abs(_homeAxisX - value) <= 0.0000000000001) return;
-                _homeAxisX = value;
-                Properties.SkyTelescope.Default.HomeAxisX = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (Math.Abs(_homeAxisX[AlignmentMode] - value) <= 0.0000000000001) return;
+                _homeAxisX[AlignmentMode] = value;
+                Properties.SkyTelescope.Default.HomeAxisX = JsonConvert.SerializeObject(_homeAxisX);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
 
-        private static double _homeAxisY = double.NaN;
+        private static DictionaryByEnum<double, AlignmentModes> _homeAxisY = new DictionaryByEnum<double, AlignmentModes>();
         public static double HomeAxisY
         {
-            get => _homeAxisY;
+            get => _homeAxisY[AlignmentMode];
             private set
             {
-                if (Math.Abs(_homeAxisY - value) <= 0.0000000000001) return;
-                _homeAxisY = value;
-                Properties.SkyTelescope.Default.HomeAxisY = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (Math.Abs(_homeAxisY[AlignmentMode] - value) <= 0.0000000000001) return;
+                _homeAxisY[AlignmentMode] = value;
+                Properties.SkyTelescope.Default.HomeAxisY = JsonConvert.SerializeObject(_homeAxisY);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
@@ -1306,58 +1306,30 @@ namespace GS.Server.SkyTelescope
             }
         }
 
-        private static double _parkAxisX = double.NaN;
+        private static DictionaryByEnum<double, AlignmentModes> _parkAxisX = new DictionaryByEnum<double, AlignmentModes>();
         public static double ParkAxisX
         {
-            get => _parkAxisX;
+            get => _parkAxisX[AlignmentMode];
             set
             {
-                if (Math.Abs(_parkAxisX - value) <= 0.0000000000001) return;
-                _parkAxisX = value;
-                Properties.SkyTelescope.Default.ParkAxisX = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (Math.Abs(_parkAxisX[AlignmentMode] - value) <= 0.0000000000001) return;
+                _parkAxisX[AlignmentMode] = value;
+                Properties.SkyTelescope.Default.ParkAxisX = JsonConvert.SerializeObject(_parkAxisX);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
 
-        private static double _parkAxisY = double.NaN;
+        private static DictionaryByEnum<double, AlignmentModes> _parkAxisY = new DictionaryByEnum<double, AlignmentModes>();
         public static double ParkAxisY
         {
-            get => _parkAxisY;
+            get => _parkAxisY[AlignmentMode];
             set
             {
-                if (Math.Abs(_parkAxisY - value) <= 0.0000000000001) return;
-                _parkAxisY = value;
-                Properties.SkyTelescope.Default.ParkAxisY = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
-                OnStaticPropertyChanged();
-            }
-        }
-
-        private static double _parkAxisAz = double.NaN;
-        public static double ParkAxisAz
-        {
-            get => _parkAxisAz;
-            set
-            {
-                if (Math.Abs(_parkAxisAz - value) <= 0.0000000000001) return;
-                _parkAxisAz = value;
-                Properties.SkyTelescope.Default.ParkAxisAz = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
-                OnStaticPropertyChanged();
-            }
-        }
-
-        private static double _parkAxisAlt = double.NaN;
-        public static double ParkAxisAlt
-        {
-            get => _parkAxisAlt;
-            set
-            {
-                if (Math.Abs(_parkAxisAlt - value) <= 0.0000000000001) return;
-                _parkAxisAlt = value;
-                Properties.SkyTelescope.Default.ParkAxisAlt = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (Math.Abs(_parkAxisY[AlignmentMode] - value) <= 0.0000000000001) return;
+                _parkAxisY[AlignmentMode] = value;
+                Properties.SkyTelescope.Default.ParkAxisY = JsonConvert.SerializeObject(_parkAxisY);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
@@ -1738,85 +1710,33 @@ namespace GS.Server.SkyTelescope
         //    }
         //}
 
+        private static DictionaryByEnum<List<ParkPosition>, AlignmentModes> _parkPositions = _parkPositions = new DictionaryByEnum<List<ParkPosition>, AlignmentModes>();
+
         public static List<ParkPosition> ParkPositions
         {
-            get
-            {
-                {
-                    switch (AlignmentMode)
-                    {
-                        case AlignmentModes.algAltAz:
-                            return ParkPositionsAltAz;
-                        case AlignmentModes.algPolar:
-                        case AlignmentModes.algGermanPolar:
-                            return ParkPositionsEQ;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-            }
-            set
-            {
-                {
-                    switch (AlignmentMode)
-                    {
-                        case AlignmentModes.algAltAz:
-                            ParkPositionsAltAz = value;
-                            break;
-                        case AlignmentModes.algPolar:
-                        case AlignmentModes.algGermanPolar:
-                            ParkPositionsEQ = value;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-                OnStaticPropertyChanged();
-            }
-        }
+            get => _parkPositions[AlignmentMode];
 
-        private static List<ParkPosition> _parkPositionsEQ;
-        public static List<ParkPosition> ParkPositionsEQ
-        {
-            get => _parkPositionsEQ;
-            set
-            {
-                {
-                    // if (_parkPositions == value) return;
-                    _parkPositionsEQ = value.OrderBy(parkPosition => parkPosition.Name).ToList();
-                    var output = JsonConvert.SerializeObject(_parkPositionsEQ);
-                    Properties.SkyTelescope.Default.ParkPositionsEQ = output;
-                    LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{output}");
-                    OnStaticPropertyChanged();
-                }
-            }
-        }
-
-        private static List<ParkPosition> _parkPositionsAltAz;
-        public static List<ParkPosition> ParkPositionsAltAz
-        {
-            get => _parkPositionsAltAz;
             set
             {
                 // if (_parkPositions == value) return;
-                _parkPositionsAltAz = value.OrderBy(parkPosition => parkPosition.Name).ToList();
-                var output = JsonConvert.SerializeObject(_parkPositionsAltAz);
-                Properties.SkyTelescope.Default.ParkPositionsAltAz = output;
+                _parkPositions[AlignmentMode] = value.OrderBy(parkPosition => parkPosition.Name).ToList();
+                var output = JsonConvert.SerializeObject(_parkPositions);
+                Properties.SkyTelescope.Default.ParkPositions = output;
                 LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{output}");
                 OnStaticPropertyChanged();
             }
         }
 
-        private static string _parkName;
+        private static DictionaryByEnum<string, AlignmentModes> _parkName = new DictionaryByEnum<string, AlignmentModes>();
         public static string ParkName
         {
-            get => _parkName;
+            get => _parkName[AlignmentMode];
             set
             {
-                if (_parkName == value) return;
-                _parkName = value;
-                Properties.SkyTelescope.Default.ParkName = value;
-                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                if (_parkName[AlignmentMode] == value) return;
+                _parkName[AlignmentMode] = value;
+                Properties.SkyTelescope.Default.ParkName = JsonConvert.SerializeObject(_parkName);
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{SkySettings.AlignmentMode}:{value}");
                 OnStaticPropertyChanged();
             }
         }
@@ -1915,7 +1835,6 @@ namespace GS.Server.SkyTelescope
         public static void Load()
         {
             Upgrade();
-
             //capabilities
             CanAlignMode = Properties.SkyTelescope.Default.CanAlignMode;
             CanAltAz = Properties.SkyTelescope.Default.CanAltAz;
@@ -1977,7 +1896,7 @@ namespace GS.Server.SkyTelescope
             AlternatingPPec = Properties.SkyTelescope.Default.AlternatingPPEC;
             ApertureArea = Properties.SkyTelescope.Default.ApertureArea;
             ApertureDiameter = Properties.SkyTelescope.Default.ApertureDiameter;
-            AtPark = Properties.SkyTelescope.Default.AtPark;
+            AtPark = LoadAlgModeProperty(ref _atPark, nameof(AtPark));
             AutoTrack = Properties.SkyTelescope.Default.AutoTrack;
             AxisTrackingLimit = Properties.SkyTelescope.Default.AxisTrackingLimit;
             CameraHeight = Properties.SkyTelescope.Default.CameraHeight;
@@ -2008,8 +1927,8 @@ namespace GS.Server.SkyTelescope
             GpsComPort = Properties.SkyTelescope.Default.GpsPort;
             GuideRateOffsetY = Properties.SkyTelescope.Default.GuideRateOffsetY;
             GuideRateOffsetX = Properties.SkyTelescope.Default.GuideRateOffsetX;
-            HomeAxisX = Properties.SkyTelescope.Default.HomeAxisX;
-            HomeAxisY = Properties.SkyTelescope.Default.HomeAxisY;
+            HomeAxisX = LoadAlgModeProperty(ref _homeAxisX, nameof(HomeAxisX));
+            HomeAxisY = LoadAlgModeProperty(ref _homeAxisY, nameof(HomeAxisY));
             HourAngleLimit = Properties.SkyTelescope.Default.HourAngleLimit;
             HomeWarning = Properties.SkyTelescope.Default.HomeWarning;
             InstrumentDescription = Properties.SkyTelescope.Default.InstrumentDescription;
@@ -2023,12 +1942,11 @@ namespace GS.Server.SkyTelescope
             MaxSlewRate = Properties.SkyTelescope.Default.MaximumSlewRate;
             MinPulseDec = Properties.SkyTelescope.Default.MinPulseDec;
             MinPulseRa = Properties.SkyTelescope.Default.MinPulseRa;
-            ParkAxisX = Properties.SkyTelescope.Default.ParkAxisX;
-            ParkAxisY = Properties.SkyTelescope.Default.ParkAxisY;
-            ParkAxisAz = Properties.SkyTelescope.Default.ParkAxisAz;
-            ParkAxisAlt = Properties.SkyTelescope.Default.ParkAxisAlt;
-            ParkName = Properties.SkyTelescope.Default.ParkName;
+            ParkAxisX = LoadAlgModeProperty(ref _parkAxisX, nameof(ParkAxisX));
+            ParkAxisY = LoadAlgModeProperty(ref _parkAxisY, nameof(ParkAxisY));
+            ParkName = LoadAlgModeProperty(ref _parkName, nameof(ParkName));
             ParkLimitName = Properties.SkyTelescope.Default.ParkLimitName;
+            ParkPositions = LoadAlgModeProperty(ref _parkPositions, nameof(ParkPositions));
             PecOn = Properties.SkyTelescope.Default.PecOn;
             PecOffSet = Properties.SkyTelescope.Default.PecOffSet;
             PPecOn = Properties.SkyTelescope.Default.PpecOn;
@@ -2063,39 +1981,15 @@ namespace GS.Server.SkyTelescope
             switch (AlignmentMode)
             {
                 case AlignmentModes.algAltAz:
+                case AlignmentModes.algPolar:
                     CanSetPierSide = false;
                     break;
-                case AlignmentModes.algPolar:
                 case AlignmentModes.algGermanPolar:
                 default:
                     CanSetPierSide = true;
                     break;
             }
             //UTCDateOffset = Properties.SkyTelescope.Default.UTCOffset;
-
-            //first time load from old park positions AltAz
-            string pp = Properties.SkyTelescope.Default.ParkPositionsAltAz;
-            if (string.IsNullOrEmpty(pp))
-            {
-                var pp1 = new ParkPosition { Name = "Default", X = ParkAxisAz, Y = ParkAxisAlt };
-                var pp2 = new ParkPosition { Name = "Home", X = 0, Y = 0 };
-                var pps = new List<ParkPosition> { pp1, pp2 };
-                pp = JsonConvert.SerializeObject(pps);
-                Properties.SkyTelescope.Default.ParkPositionsAltAz = pp;
-            }
-
-             //first time load from old park positions EQ
-           ParkPositionsAltAz = JsonConvert.DeserializeObject<List<ParkPosition>>(pp);
-            pp = Properties.SkyTelescope.Default.ParkPositionsEQ;
-            if (string.IsNullOrEmpty(pp))
-            {
-                var pp1 = new ParkPosition { Name = "Default", X = ParkAxisX, Y = ParkAxisY };
-                var pp2 = new ParkPosition { Name = "Home", X = 90, Y = 90 };
-                var pps = new List<ParkPosition> { pp1, pp2 };
-                pp = JsonConvert.SerializeObject(pps);
-                Properties.SkyTelescope.Default.ParkPositionsEQ = pp;
-            }
-            ParkPositionsEQ =JsonConvert.DeserializeObject<List<ParkPosition>>(pp);
         }
 
         /// <summary>
@@ -2142,6 +2036,55 @@ namespace GS.Server.SkyTelescope
             StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(propertyName));
         }
 
+        /// <summary>
+        /// Generic function to load property from settings in user.config indexed by AlignmentModes enum
+        /// Load backing variable with array of values - try catch for earlier single value non-json property
+        /// </summary>
+        /// <typeparam name="T">Property type</typeparam>
+        /// <param name="propBacker">Backing variable for indexed property</param>
+        /// <param name="propName">Property name as string, use nameof() for compile time check</param>
+        static T LoadAlgModeProperty<T>(ref DictionaryByEnum<T, AlignmentModes> propBacker, string propName)
+        {
+            var propDefault = (string)Properties.SkyTelescope.Default[propName];
+            try
+            {
+                propBacker = JsonConvert.DeserializeObject<DictionaryByEnum<T, AlignmentModes>>(propDefault);
+                return propBacker[AlignmentMode];
+            }
+            catch (Exception e) when (e is JsonReaderException || e is JsonSerializationException)
+            {
+                T value = Convert<T>(propDefault);
+                propBacker = JsonConvert.DeserializeObject<DictionaryByEnum<T, AlignmentModes>>((string)Properties.SkyTelescope.Default.Properties[propName].DefaultValue);
+                Properties.SkyTelescope.Default[propName] = JsonConvert.SerializeObject(propBacker);
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Generic string to value converter
+        /// .NET 7 has IParsable built in to handle generics to implement generic T.TryParse. This function will
+        /// fail if Type T does not implement a Get.Converter extension
+        /// </summary>
+        /// <typeparam name="T">Convert to Type T</typeparam>
+        /// <param name="input">String to be converted</param>
+        /// <returns>Converted value of Type T</returns>
+        static T Convert<T>(this string input)
+        {
+            try
+            {
+                var converter = TypeDescriptor.GetConverter(typeof(T));
+                if (converter != null)
+                {
+                    // Cast ConvertFromString(string text) : object to (T)
+                    return (T)converter.ConvertFromString(input);
+                }
+                return default(T);
+            }
+            catch (NotSupportedException)
+            {
+                return default(T);
+            }
+        }
         #endregion
     }
 }

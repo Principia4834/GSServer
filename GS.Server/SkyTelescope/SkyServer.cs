@@ -3616,36 +3616,23 @@ namespace GS.Server.SkyTelescope
         /// </summary>
         private static double[] GetDefaultPositions()
         {
-            double[] positions;
-            // set default home position
-            switch (SkySettings.AlignmentMode)
+            // set default home position or get home override from the settings 
+            double[] positions = {0, 0};
+            string name = String.Empty;
+            _homeAxes.X = SkySettings.HomeAxisX;
+            _homeAxes.Y = SkySettings.HomeAxisY;
+            var monitorItem = new MonitorEntry
             {
-                case AlignmentModes.algGermanPolar:
-                    _homeAxes.X = 90;
-                    _homeAxes.Y = 90;
-                    break;
-                case AlignmentModes.algPolar:
-                    _homeAxes.X = 90;
-                    _homeAxes.Y = 90;
-                    break;
-                case AlignmentModes.algAltAz:
-                    _homeAxes.X = 0;
-                    _homeAxes.Y = 0;
-                    break;
-                default:
-                    _homeAxes.X = 90;
-                    _homeAxes.Y = 90;
-                    break;
-            }
+                Datetime = HiResDateTime.UtcNow,
+                Device = MonitorDevice.Server,
+                Category = MonitorCategory.Server,
+                Type = MonitorType.Information,
+                Method = MethodBase.GetCurrentMethod()?.Name,
+                Thread = Thread.CurrentThread.ManagedThreadId,
+                Message = $"Home position,{name}|{_homeAxes.X}|{_homeAxes.Y}"
+            };
+            MonitorLog.LogToMonitor(monitorItem);
 
-            // get home override from the settings
-            if (Math.Abs(SkySettings.HomeAxisX) > 0 || Math.Abs(SkySettings.HomeAxisY) > 0)
-            {
-                _homeAxes.X = SkySettings.HomeAxisX;
-                _homeAxes.Y = SkySettings.HomeAxisY;
-            }
-
-            MonitorEntry monitorItem;
             if (AtPark)
             {
                 if (SkySettings.AutoTrack)
@@ -4482,6 +4469,7 @@ namespace GS.Server.SkyTelescope
                     // Correct position after lash correction
                     if (HcPrevMoveDec != null) HcPrevMoveDec.StepStart = GetRawSteps(1);
 
+                    //RA Anti-backlash compensate
                     if (Math.Abs(stepsNeededRa) > 0)
                     {
                         var a = new CmdAxesDegrees(MountQueue.NewId);
@@ -4508,7 +4496,7 @@ namespace GS.Server.SkyTelescope
 
                     break;
                 case MountType.SkyWatcher:
-                    // implement anti-backlash
+                    // Dec anti-backlash compensate
                     if (Math.Abs(stepsNeededDec) > 0)
                     {
                         HcPrevMovesDec.Clear();

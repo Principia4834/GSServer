@@ -352,9 +352,7 @@ namespace GS.Server.SkyTelescope
                      case "Elevation":
                          Elevation = SkySettings.Elevation;
                          break;
-//                     case "ParkPositions":
-                     case "ParkPositionsEQ":
-                     case "ParkPositionsAltAz":
+                     case "ParkPositions":
                          // ReSharper disable ExplicitCallerInfoArgument
                          OnPropertyChanged($"ParkPositions");
                          break;
@@ -958,22 +956,11 @@ namespace GS.Server.SkyTelescope
             set
             {
                 SkySettings.AlignmentMode = value;
-                //disable CanSetPierSide if AltAz alignment
-                switch (AlignmentMode)
-                {
-                    case AlignmentModes.algAltAz:
-                        SkySettings.CanSetPierSide = false;
-                        break;
-                    case AlignmentModes.algPolar:
-                    case AlignmentModes.algGermanPolar:
-                    default:
-                        SkySettings.CanSetPierSide = true;
-                        break;
-                }
+                // save and reload all settings for new alignment mode
+                SkySettings.Save();
                 //reset 3D view for alignment type
                 OpenResetView();
                 OnPropertyChanged();
-
             }
         }
         public EquatorialCoordinateType EquatorialCoordinateType

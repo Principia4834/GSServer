@@ -22,6 +22,7 @@ using GS.Shared;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -566,6 +567,34 @@ namespace ASCOM.GS.Sky.Telescope
             }
         }
 
+        public void Connect()
+        {
+            try
+            {
+                var monitorItem = new MonitorEntry
+                    { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = String.Empty };
+                MonitorLog.LogToMonitor(monitorItem);
+                // This method is only valid in interface V4 and later
+                CheckCapability(InterfaceVersion >= 4, "Connect", false);
+                SkySystem.SetConnected(_objectId, true);
+            }
+            catch (Exception ex)
+            {
+                var monitorItem = new MonitorEntry
+                {
+                    Datetime = HiResDateTime.UtcNow,
+                    Device = MonitorDevice.Telescope,
+                    Category = MonitorCategory.Driver,
+                    Type = MonitorType.Warning,
+                    Method = MethodBase.GetCurrentMethod()?.Name,
+                    Thread = Thread.CurrentThread.ManagedThreadId,
+                    Message = FormattableString.Invariant($"{ex.Message},{ex.StackTrace}")
+                };
+                MonitorLog.LogToMonitor(monitorItem);
+                throw;
+            }
+        }
+
         public bool Connected
         {
             get
@@ -624,6 +653,10 @@ namespace ASCOM.GS.Sky.Telescope
 
                 CheckCapability(SkySettings.CanSetEquRates, "DeclinationRate", true);
                 CheckRate(value);
+                if (TrackingRate != DriveRates.driveSidereal)
+                {
+                    throw new InvalidOperationException(" DeclinationRate - cannot set rate because TrackingRate is not Sidereal");
+                }
                 SkyServer.RateDecOrg = value;
                 SkyServer.RateDec = Conversions.ArcSec2Deg(value);
             }
@@ -654,6 +687,64 @@ namespace ASCOM.GS.Sky.Telescope
             var radec = Transforms.CoordTypeToInternal(RightAscension, Declination);
             var r = SkyServer.DetermineSideOfPier(radec.X, radec.Y);
             return r;
+        }
+
+        //public IStateValueCollection DeviceState
+        //{
+        //    get
+        //    {
+        //        // This method is only valid in interface V4 and later
+        //        CheckCapability(InterfaceVersion >= 4, "DeviceState", false);
+
+        //        // Create an array list to hold the IStateValue entries
+        //        List<IStateValue> deviceState = new List<IStateValue>();
+
+        //        // Add one entry for each operational state, if possible
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.Altitude), Altitude)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.AtHome), AtHome)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.AtPark), AtPark)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.Azimuth), Azimuth)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.Declination), Declination)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.IsPulseGuiding), IsPulseGuiding)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.RightAscension), RightAscension)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.SideOfPier), SideOfPier)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.SiderealTime), SiderealTime)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.Slewing), Slewing)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.Tracking), Tracking)); } catch { }
+        //        try { deviceState.Add(new StateValue(nameof(ITelescopeV4.UTCDate), UTCDate)); } catch { }
+        //        try { deviceState.Add(new StateValue(DateTime.Now)); } catch { }
+
+        //        // Return the overall device state
+        //        return new StateValueCollection(deviceState);
+        //    }
+        //}
+
+        public void Disconnect()
+        {
+            try
+            {
+                var monitorItem = new MonitorEntry
+                { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = String.Empty };
+                MonitorLog.LogToMonitor(monitorItem);
+                // This method is only valid in interface V4 and later
+                CheckCapability(InterfaceVersion >= 4, "Disconnect", false);
+                SkySystem.SetConnected(_objectId, false);
+            }
+            catch (Exception ex)
+            {
+                var monitorItem = new MonitorEntry
+                {
+                    Datetime = HiResDateTime.UtcNow,
+                    Device = MonitorDevice.Telescope,
+                    Category = MonitorCategory.Driver,
+                    Type = MonitorType.Warning,
+                    Method = MethodBase.GetCurrentMethod()?.Name,
+                    Thread = Thread.CurrentThread.ManagedThreadId,
+                    Message = FormattableString.Invariant($"{ex.Message},{ex.StackTrace}")
+                };
+                MonitorLog.LogToMonitor(monitorItem);
+                throw;
+            }
         }
 
         public bool DoesRefraction
@@ -919,6 +1010,8 @@ namespace ASCOM.GS.Sky.Telescope
         {
             try
             {
+                if (IsPulseGuiding && SkySettings.AlignmentMode == AlignmentModes.algAltAz) 
+                    throw new InvalidOperationException("Alt Az mode does not support dual axis pulse guiding");
                 switch (Direction)
                 {
                     case GuideDirections.guideNorth:
@@ -946,13 +1039,7 @@ namespace ASCOM.GS.Sky.Telescope
                 CheckCapability(SkySettings.CanPulseGuide, "PulseGuide");
                 CheckRange(Duration, 0, 30000, "PulseGuide", "Duration");
                 DateTime startTime = HiResDateTime.UtcNow;
-                SkyServer.PulseGuide(Direction, Duration);
-                // If synchronous (must be for Alt Az) wait out the remaining pulse guide duration here
-                if (!SkySettings.CanDualAxisPulseGuide || SkySettings.AlignmentMode == AlignmentModes.algAltAz) 
-                {
-                    var sleepTime = Duration - (int)(HiResDateTime.UtcNow - startTime).TotalMilliseconds;
-                    Thread.Sleep(sleepTime > 0 ? sleepTime : 0);
-                }
+                SkyServer.PulseGuideAsync(Direction, Duration);
             }
             catch (Exception e)
             {
@@ -1019,6 +1106,10 @@ namespace ASCOM.GS.Sky.Telescope
 
                 CheckCapability(SkySettings.CanSetEquRates, "RightAscensionRate ", true);
                 CheckRate(value);
+                if (TrackingRate != DriveRates.driveSidereal)
+                {
+                    throw new InvalidOperationException(" RightAscensionRate - cannot set rate because TrackingRate is not Sidereal");
+                }
                 SkyServer.RateRaOrg = value;
                 SkyServer.RateRa = Conversions.ArcSec2Deg(Conversions.SideSec2ArcSec(value));
             }
@@ -1556,6 +1647,13 @@ namespace ASCOM.GS.Sky.Telescope
 
                 CheckVersionOne("TrackingRate", true);
                 CheckTrackingRate("TrackingRate", value);
+                if (value != DriveRates.driveSidereal)
+                {
+                    SkyServer.RateDecOrg = 0;
+                    SkyServer.RateDec = 0;
+                    SkyServer.RateRaOrg = 0;
+                    SkyServer.RateRa = 0;
+                }
                 SkySettings.TrackingRate = value;
             }
         }

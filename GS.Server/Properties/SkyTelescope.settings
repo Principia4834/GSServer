@@ -17,8 +17,8 @@
     <Setting Name="ApertureDiameter" Type="System.Double" Scope="User">
       <Value Profile="(Default)">0.2</Value>
     </Setting>
-    <Setting Name="AtPark" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+    <Setting Name="AtPark" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":"false","algPolar":"false","algGermanPolar":"false"}</Value>
     </Setting>
     <Setting Name="AutoTrack" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -47,11 +47,11 @@
     <Setting Name="HandShake" Type="System.String" Scope="User">
       <Value Profile="(Default)">None</Value>
     </Setting>
-    <Setting Name="HomeAxisX" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="HomeAxisX" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":0,"algPolar":0,"algGermanPolar":90}</Value>
     </Setting>
-    <Setting Name="HomeAxisY" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="HomeAxisY" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":0,"algPolar":0,"algGermanPolar":90}</Value>
     </Setting>
     <Setting Name="HourAngleLimit" Type="System.Double" Scope="User">
       <Value Profile="(Default)">15</Value>
@@ -74,11 +74,11 @@
     <Setting Name="HcSpeed" Type="System.String" Scope="User">
       <Value Profile="(Default)">Seven</Value>
     </Setting>
-    <Setting Name="ParkAxisX" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">90</Value>
+    <Setting Name="ParkAxisX" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":"0","algPolar":"90","algGermanPolar":"90"}</Value>
     </Setting>
-    <Setting Name="ParkAxisY" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">90</Value>
+    <Setting Name="ParkAxisY" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":"0","algPolar":"90","algGermanPolar":"90"}</Value>
     </Setting>
     <Setting Name="ReadTimeout" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1000</Value>
@@ -248,11 +248,8 @@
     <Setting Name="HCMode" Type="System.String" Scope="User">
       <Value Profile="(Default)">Axes</Value>
     </Setting>
-    <Setting Name="ParkPositionsEQ" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ParkName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Default</Value>
+      <Value Profile="(Default)">{"algAltAz":"","algPolar":"","algGermanPolar":""}</Value>
     </Setting>
     <Setting Name="DecPulseToGoTo" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
@@ -392,15 +389,6 @@
     <Setting Name="AltAxisLimitOn" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="ParkAxisAz" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="ParkAxisAlt" Type="System.Double" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="ParkPositionsAltAz" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="AltAzAxesLimitOn" Type="System.String" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
@@ -412,6 +400,11 @@
     </Setting>
     <Setting Name="AzSlewLimit" Type="System.Double" Scope="User">
       <Value Profile="(Default)">15</Value>
+    </Setting>
+    <Setting Name="ParkPositions" Type="System.String" Scope="User">
+      <Value Profile="(Default)">{"algAltAz":[{"Name":"Default","X":0.0,"Y":0.0},{"Name":"Home","X":0.0,"Y":0.0}],
+"algPolar":[{"Name":"Default","X":0.0,"Y":0.0},{"Name":"Home","X":90.0,"Y":90.0}],
+"algGermanPolar":[{"Name":"Default","X":0.0,"Y":0.0},{"Name":"Home","X":90.0,"Y":90.0}]}</Value>
     </Setting>
   </Settings>
 </SettingsFile>

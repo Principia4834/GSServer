@@ -12,7 +12,7 @@ namespace GS.Server.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.9.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
     internal sealed partial class SkyTelescope : global::System.Configuration.ApplicationSettingsBase {
         
         private static SkyTelescope defaultInstance = ((SkyTelescope)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SkyTelescope())));
@@ -85,10 +85,10 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AtPark {
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":\"false\",\"algPolar\":\"false\",\"algGermanPolar\":\"false\"}")]
+        public string AtPark {
             get {
-                return ((bool)(this["AtPark"]));
+                return ((string)(this["AtPark"]));
             }
             set {
                 this["AtPark"] = value;
@@ -205,10 +205,10 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double HomeAxisX {
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":0,\"algPolar\":0,\"algGermanPolar\":90}")]
+        public string HomeAxisX {
             get {
-                return ((double)(this["HomeAxisX"]));
+                return ((string)(this["HomeAxisX"]));
             }
             set {
                 this["HomeAxisX"] = value;
@@ -217,10 +217,10 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double HomeAxisY {
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":0,\"algPolar\":0,\"algGermanPolar\":90}")]
+        public string HomeAxisY {
             get {
-                return ((double)(this["HomeAxisY"]));
+                return ((string)(this["HomeAxisY"]));
             }
             set {
                 this["HomeAxisY"] = value;
@@ -313,10 +313,10 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
-        public double ParkAxisX {
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":\"0\",\"algPolar\":\"90\",\"algGermanPolar\":\"90\"}")]
+        public string ParkAxisX {
             get {
-                return ((double)(this["ParkAxisX"]));
+                return ((string)(this["ParkAxisX"]));
             }
             set {
                 this["ParkAxisX"] = value;
@@ -325,10 +325,10 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("90")]
-        public double ParkAxisY {
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":\"0\",\"algPolar\":\"90\",\"algGermanPolar\":\"90\"}")]
+        public string ParkAxisY {
             get {
-                return ((double)(this["ParkAxisY"]));
+                return ((string)(this["ParkAxisY"]));
             }
             set {
                 this["ParkAxisY"] = value;
@@ -1009,19 +1009,7 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ParkPositionsEQ {
-            get {
-                return ((string)(this["ParkPositionsEQ"]));
-            }
-            set {
-                this["ParkPositionsEQ"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Default")]
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":\"\",\"algPolar\":\"\",\"algGermanPolar\":\"\"}")]
         public string ParkName {
             get {
                 return ((string)(this["ParkName"]));
@@ -1585,42 +1573,6 @@ namespace GS.Server.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double ParkAxisAz {
-            get {
-                return ((double)(this["ParkAxisAz"]));
-            }
-            set {
-                this["ParkAxisAz"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double ParkAxisAlt {
-            get {
-                return ((double)(this["ParkAxisAlt"]));
-            }
-            set {
-                this["ParkAxisAlt"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ParkPositionsAltAz {
-            get {
-                return ((string)(this["ParkPositionsAltAz"]));
-            }
-            set {
-                this["ParkPositionsAltAz"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public string AltAzAxesLimitOn {
             get {
@@ -1664,6 +1616,21 @@ namespace GS.Server.Properties {
             }
             set {
                 this["AzSlewLimit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("{\"algAltAz\":[{\"Name\":\"Default\",\"X\":0.0,\"Y\":0.0},{\"Name\":\"Home\",\"X\":0.0,\"Y\":0.0}]," +
+            "\r\n\"algPolar\":[{\"Name\":\"Default\",\"X\":0.0,\"Y\":0.0},{\"Name\":\"Home\",\"X\":90.0,\"Y\":90." +
+            "0}],\r\n\"algGermanPolar\":[{\"Name\":\"Default\",\"X\":0.0,\"Y\":0.0},{\"Name\":\"Home\",\"X\":90" +
+            ".0,\"Y\":90.0}]}")]
+        public string ParkPositions {
+            get {
+                return ((string)(this["ParkPositions"]));
+            }
+            set {
+                this["ParkPositions"] = value;
             }
         }
     }

@@ -5915,9 +5915,10 @@ namespace GS.Server.SkyTelescope
         /// <param name="rightAscension"></param>
         /// <param name="declination"></param>
         /// <param name="tracking"></param>
-        public static void SlewRaDec(double rightAscension, double declination, bool tracking = false)
+        /// <param name="slewStartedEvent">Optional event to signal when slew has started</param>
+        public static void SlewRaDec(double rightAscension, double declination, bool tracking = false, ManualResetEvent slewStartedEvent = null)
         {
-            SlewMount(new Vector(rightAscension, declination), SlewType.SlewRaDec, tracking);
+            SlewMount(new Vector(rightAscension, declination), SlewType.SlewRaDec, tracking, true, slewStartedEvent);
         }
 
         /// <summary>
@@ -6143,9 +6144,10 @@ namespace GS.Server.SkyTelescope
         /// </summary>
         /// <param name="altitude"></param>
         /// <param name="azimuth"></param>
-        public static void SlewAltAz(double altitude, double azimuth)
+        /// <param name="slewStartedEvent">Optional event to signal when slew has started</param>
+        public static void SlewAltAz(double altitude, double azimuth, ManualResetEvent slewStartedEvent = null)
         {
-            SlewMount(new Vector(azimuth, altitude), SlewType.SlewAltAz);
+            SlewMount(new Vector(azimuth, altitude), SlewType.SlewAltAz, false, true, slewStartedEvent);
         }
 
         /// <summary>
@@ -6173,7 +6175,7 @@ namespace GS.Server.SkyTelescope
         /// <param name="slewAsync">A value indicating whether the slew operation should be performed asynchronously. <see langword="true"/> to
         /// perform the operation asynchronously; otherwise, <see langword="false"/>. The default is <see
         /// langword="true"/>.</param>
-        private static void SlewMount(Vector targetPosition, SlewType slewState, bool tracking = false, bool slewAsync = true)
+        private static void SlewMount(Vector targetPosition, SlewType slewState, bool tracking = false, bool slewAsync = true, ManualResetEvent externalSlewStartedEvent = null)
         {
             if (!IsMountRunning) { return; }
 
@@ -6194,16 +6196,27 @@ namespace GS.Server.SkyTelescope
 
             AtPark = false;
             SpeakSlewStart(slewState);
-            // Set up event handle and task for checking slew started
-            EventWaitHandle goToStartedEvent = new ManualResetEvent(false);
+
+            // Use external event if provided, otherwise create internal one
+            EventWaitHandle goToStartedEvent = externalSlewStartedEvent ?? new ManualResetEvent(false);
+
             Action goTo = () =>
                 GoToAsync(new[] { targetPosition.X, targetPosition.Y }, slewState, goToStartedEvent, tracking);
             Task goToTask = new Task(goTo);
-            // Start the go to and wait for the started event - IsSlewing will be set
+            Thread.Sleep(10); // brief pause to allow task to start
+
+            // Start the go to and ALWAYS wait for the started event - IsSlewing will be set
             goToTask.Start();
             goToStartedEvent.WaitOne(5000); // Timeout for the event to be set
+
             if (!slewAsync) goToTask.Wait();
-            goToStartedEvent = null;
+
+            // Only dispose if we created it internally
+            if (externalSlewStartedEvent == null)
+            {
+                goToStartedEvent.Dispose();
+                goToStartedEvent = null;
+            }
         }
 
         /// <summary>

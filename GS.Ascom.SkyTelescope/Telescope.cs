@@ -1,4 +1,4 @@
-/*Copyright(C) 2019-2025 Rob Morgan (robert.morgan.e@gmail.com)
+﻿/*Copyright(C) 2019-2025 Rob Morgan (robert.morgan.e@gmail.com)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published
@@ -14,6 +14,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 using ASCOM.DeviceInterface;
+using ASCOM.DriverAccess;
 using ASCOM.Utilities;
 using GS.Principles;
 using GS.Server.Helpers;
@@ -1516,8 +1517,9 @@ namespace ASCOM.GS.Sky.Telescope
         public void SlewToAltAzAsync(double az, double alt)
         {
             if (!SkyServer.AsComOn) return;
+
             var monitorItem = new MonitorEntry
-            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $"{_util.DegreesToDMS(az, "\u00B0 ", ":", "", 2)}|{_util.DegreesToDMS(alt, "\u00B0 ", ":", "", 2)}" };
+                { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $"{_util.DegreesToDMS(az, "\u00B0 ", ":", "", 2)}|{_util.DegreesToDMS(alt, "\u00B0 ", ":", "", 2)}" };
             MonitorLog.LogToMonitor(monitorItem);
 
             CheckCapability(SkySettings.CanSlewAltAzAsync, "SlewToAltAzAsync");
@@ -1526,7 +1528,15 @@ namespace ASCOM.GS.Sky.Telescope
             CheckRange(az, 0, 360, "SlewToAltAzAsync", "Azimuth");
             CheckRange(alt, -90, 90, "SlewToAltAzAsync", "Altitude");
             CheckReachable(az, alt, SlewType.SlewAltAz);
-            SkyServer.SlewAltAz(alt, az);
+
+            // Create event to signal when slew has started (IsSlewing = true)
+            var slewStartedEvent = new ManualResetEvent(false);
+
+            // Start the slew - SlewMount will wait for IsSlewing to be set
+            SkyServer.SlewAltAz(alt, az, slewStartedEvent);
+
+            // Clean up
+            slewStartedEvent.Dispose();
         }
 
         public void SlewToCoordinates(double ra, double dec)
@@ -1563,7 +1573,7 @@ namespace ASCOM.GS.Sky.Telescope
             if (!SkyServer.AsComOn) return;
 
             var monitorItem = new MonitorEntry
-            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $"{_util.HoursToHMS(ra, "h ", ":", "", 2)}|{_util.DegreesToDMS(dec, "\u00B0 ", ":", "", 2)}" };
+                { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Driver, Type = MonitorType.Information, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $"{_util.HoursToHMS(ra, "h ", ":", "", 2)}|{_util.DegreesToDMS(dec, "\u00B0 ", ":", "", 2)}" };
             MonitorLog.LogToMonitor(monitorItem);
 
             CheckCapability(SkySettings.CanSlewAsync, "SlewToCoordinatesAsync");
@@ -1577,7 +1587,15 @@ namespace ASCOM.GS.Sky.Telescope
             TargetDeclination = dec;
             var raDec = Transforms.CoordTypeToInternal(ra, dec);
             SkyServer.CycleOnTracking(true);
-            SkyServer.SlewRaDec(raDec.X, raDec.Y, true);
+
+            // Create event to signal when slew has started (IsSlewing = true)
+            var slewStartedEvent = new ManualResetEvent(false);
+
+            // Start the slew - SlewMount will wait for IsSlewing to be set
+            SkyServer.SlewRaDec(raDec.X, raDec.Y, true, slewStartedEvent);
+
+            // Clean up
+            slewStartedEvent.Dispose();
         }
 
         public void SlewToTarget()
@@ -1637,8 +1655,16 @@ namespace ASCOM.GS.Sky.Telescope
             CheckTracking(true, "SlewToTargetAsync");
             CheckReachable(RightAscension, Declination, SlewType.SlewRaDec);
 
-            var xy = Transforms.CoordTypeToInternal(ra, dec);
-            SkyServer.SlewRaDec(xy.X, xy.Y, true);
+            var raDec = Transforms.CoordTypeToInternal(ra, dec);
+
+            // Create event to signal when slew has started (IsSlewing = true)
+            var slewStartedEvent = new ManualResetEvent(false);
+
+            // Start the slew - SlewMount will wait for IsSlewing to be set
+            SkyServer.SlewRaDec(raDec.X, raDec.Y, true, slewStartedEvent);
+
+            // Clean up
+            slewStartedEvent.Dispose();
         }
 
         public void SyncToAltAz(double az, double alt)

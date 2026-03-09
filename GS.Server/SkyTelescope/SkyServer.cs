@@ -4354,6 +4354,22 @@ namespace GS.Server.SkyTelescope
                                 }
                             }
                             break;
+                        case SlewDirection.SlewNorthEast:
+                            change[1] = delta;
+                            change[0] = SouthernHemisphere && !altAzModeSet ? -delta : delta;
+                            break;
+                        case SlewDirection.SlewNorthWest:
+                            change[1] = delta;
+                            change[0] = SouthernHemisphere && !altAzModeSet ? delta : -delta;
+                            break;
+                        case SlewDirection.SlewSouthEast:
+                            change[1] = -delta;
+                            change[0] = SouthernHemisphere && !altAzModeSet ? -delta : delta;
+                            break;
+                        case SlewDirection.SlewSouthWest:
+                            change[1] = -delta;
+                            change[0] = SouthernHemisphere && !altAzModeSet ? delta : -delta;
+                            break;
                         default:
                             change[0] = 0;
                             change[1] = 0;
@@ -4448,6 +4464,94 @@ namespace GS.Server.SkyTelescope
                                 }
                             }
                             break;
+                        case SlewDirection.SlewNorthEast:
+                            if (!altAzModeSet)
+                            {
+                                switch (SkySettings.Mount)
+                                {
+                                    case MountType.Simulator:
+                                        change[1] = SideOfPier == PierSide.pierEast ? delta : -delta;
+                                        break;
+                                    case MountType.SkyWatcher:
+                                        change[1] = SideOfPier == PierSide.pierEast ? -delta : delta;
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                                change[0] = SouthernHemisphere ? delta : -delta;
+                            }
+                            else
+                            {
+                                change[1] = delta;
+                                change[0] = delta;
+                            }
+                            break;
+                        case SlewDirection.SlewNorthWest:
+                            if (!altAzModeSet)
+                            {
+                                switch (SkySettings.Mount)
+                                {
+                                    case MountType.Simulator:
+                                        change[1] = SideOfPier == PierSide.pierEast ? delta : -delta;
+                                        break;
+                                    case MountType.SkyWatcher:
+                                        change[1] = SideOfPier == PierSide.pierEast ? -delta : delta;
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                                change[0] = SouthernHemisphere ? -delta : delta;
+                            }
+                            else
+                            {
+                                change[1] = delta;
+                                change[0] = -delta;
+                            }
+                            break;
+                        case SlewDirection.SlewSouthEast:
+                            if (!altAzModeSet)
+                            {
+                                switch (SkySettings.Mount)
+                                {
+                                    case MountType.Simulator:
+                                        change[1] = SideOfPier == PierSide.pierWest ? delta : -delta;
+                                        break;
+                                    case MountType.SkyWatcher:
+                                        change[1] = SideOfPier == PierSide.pierWest ? -delta : delta;
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                                change[0] = SouthernHemisphere ? delta : -delta;
+                            }
+                            else
+                            {
+                                change[1] = -delta;
+                                change[0] = delta;
+                            }
+                            break;
+                        case SlewDirection.SlewSouthWest:
+                            if (!altAzModeSet)
+                            {
+                                switch (SkySettings.Mount)
+                                {
+                                    case MountType.Simulator:
+                                        change[1] = SideOfPier == PierSide.pierWest ? delta : -delta;
+                                        break;
+                                    case MountType.SkyWatcher:
+                                        change[1] = SideOfPier == PierSide.pierWest ? -delta : delta;
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
+                                }
+                                change[0] = SouthernHemisphere ? -delta : delta;
+                            }
+                            else
+                            {
+                                change[1] = -delta;
+                                change[0] = -delta;
+                            }
+                            break;
                         default:
                             change[0] = 0;
                             change[1] = 0;
@@ -4499,6 +4603,10 @@ namespace GS.Server.SkyTelescope
                     case SlewDirection.SlewUp:
                     case SlewDirection.SlewSouth:
                     case SlewDirection.SlewDown:
+                    case SlewDirection.SlewNorthEast:
+                    case SlewDirection.SlewNorthWest:
+                    case SlewDirection.SlewSouthEast:
+                    case SlewDirection.SlewSouthWest:
                         if (Math.Abs(_hcPrevMoveDec.Delta) > 0.000000 &&
                             Math.Sign(_hcPrevMoveDec.Delta) != Math.Sign(change[1]))
                         {
@@ -4600,6 +4708,25 @@ namespace GS.Server.SkyTelescope
                     break;
                 case SlewDirection.SlewNoneRa:
                 case SlewDirection.SlewNoneDec:
+                    break;
+                case SlewDirection.SlewNorthEast:
+                case SlewDirection.SlewNorthWest:
+                case SlewDirection.SlewSouthEast:
+                case SlewDirection.SlewSouthWest:
+                    _hcPrevMoveDec = new HcPrevMove
+                    {
+                        Direction = direction,
+                        StartDate = HiResDateTime.UtcNow,
+                        Delta = change[1],
+                        StepStart = GetRawSteps(1),
+                    };
+                    _hcPrevMoveRa = new HcPrevMove
+                    {
+                        Direction = direction,
+                        StartDate = HiResDateTime.UtcNow,
+                        Delta = change[0],
+                        StepStart = GetRawSteps(0),
+                    };
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
@@ -4786,6 +4913,11 @@ namespace GS.Server.SkyTelescope
                     case SlewDirection.SlewLeft:
                     case SlewDirection.SlewRight:
                         break;
+                    case SlewDirection.SlewNorthEast:
+                    case SlewDirection.SlewNorthWest:
+                    case SlewDirection.SlewSouthEast:
+                    case SlewDirection.SlewSouthWest:
+                        return;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                 }

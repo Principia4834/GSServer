@@ -143,7 +143,7 @@ namespace GS.Server.SkyTelescope
                     DecBacklashList = DecBacklashList.Concat(extendedList);
                     AxisTrackingLimits = new List<double>(Numbers.InclusiveRange(0, 15, 1));
                     AxisHzTrackingLimits = new List<double>(Numbers.InclusiveRange(-20, 20, 1));
-                    HomeAxisAltList = new List<int>(Numbers.InclusiveIntRange(-10, 10, 1));
+                    HomeAxisAltList = new List<int>(Numbers.InclusiveIntRange(-90, 90, 1));
                     HomeParkAzList  = new List<int>(Numbers.InclusiveIntRange(0, 360, 1));
                     HomeParkAltList = new List<int>(Numbers.InclusiveIntRange(-90, 90, 1));
 
@@ -193,10 +193,7 @@ namespace GS.Server.SkyTelescope
                     FlipDialogHeader = GetResourceByMode("btnFlip");
                     FlipDialogText = GetResourceByMode("btnContinueFlip");
                     // Home and AutoHome Settings Dialog
-                    HomeAxisX = (int) SkySettings.HomeAxisX;
-                    var angleOffset = SkyServer.SouthernHemisphere ? 180 : 0;
-                    HomeAxisX -= angleOffset;
-                    HomeAxisY = (int) SkySettings.HomeAxisY;
+                     RefreshHomeAxisDisplay();
                     if (SkySettings.AutoHomeAxisX == 90.0 && SkySettings.AutoHomeAxisY == 90.0) // Factory default
                     {
                         AutoHomeAxisAz = SkyServer.SouthernHemisphere ? 0 : 180;
@@ -275,6 +272,18 @@ namespace GS.Server.SkyTelescope
                 SkyServer.IsMountRunning = false;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
+        }
+
+        /// <summary>
+        /// Refreshes HomeAxisX and HomeAxisY VM properties from the current SkySettings values.
+        /// Called from the constructor and whenever AlignmentMode changes.
+        /// </summary>
+        private void RefreshHomeAxisDisplay()
+        {
+            HomeAxisX = (int)SkySettings.HomeAxisX;
+            var angleOffset = SkyServer.SouthernHemisphere ? 180 : 0;
+            HomeAxisX -= angleOffset;
+            HomeAxisY = (int)SkySettings.HomeAxisY;
         }
 
         /// <summary>
@@ -535,6 +544,8 @@ namespace GS.Server.SkyTelescope
                          SkyServer.MountReset();
                          // Update View Model with new settings
                          UpdateSkyTelescopeVM();
+                         // Refresh home axis display for new alignment mode
+                         RefreshHomeAxisDisplay();
                          // Set side of pier, flip and other alignment mode dependent UI elements
                          SideOfPierUIToolTip = GetResourceByMode("botTipSOP");
                          // Flip Button
@@ -6725,6 +6736,9 @@ namespace GS.Server.SkyTelescope
             }
         }
 
+        // When set, ClickOkDialog restores this content instead of closing the dialog
+        private object _returnDialogContent;
+
         private ICommand _openDialogCommand;
         public ICommand OpenDialogCommand
         {
@@ -6793,8 +6807,16 @@ namespace GS.Server.SkyTelescope
         }
         private void ClickOkDialog()
         {
-            IsDialogOpen = false;
-            LockOn = false;
+            if (_returnDialogContent != null)
+            {
+                DialogContent = _returnDialogContent;
+                _returnDialogContent = null;
+            }
+            else
+            {
+                IsDialogOpen = false;
+                LockOn = false;
+            }
         }
 
         private ICommand _clickCancelDialogCommand;
@@ -11652,6 +11674,33 @@ namespace GS.Server.SkyTelescope
                 {
                     homeParkAxes[0] = 90.0;
                     homeParkAxes[1] = 90.0;
+                }
+
+                // Validate custom park position is reachable with a normal slew
+                if (SelectedHomeParkPosition == HomeParkPositionType.Custom)
+                {
+                    var physicalTarget = SkyServer.MapSlewTargetToAxes(
+                        new[] { homeParkAxes[0], homeParkAxes[1] }, SlewType.SlewPark);
+
+                    if (!SkyServer.IsTargetWithinLimits(physicalTarget))
+                    {
+                        _returnDialogContent = new HomeSettingsDialog();
+                        DialogMsg = $"{Application.Current.Resources["homeSettingsParkOutsideLimits"]}";
+                        DialogCaption = $"{Application.Current.Resources["exError"]}";
+                        DialogContent = new DialogOK();
+                        IsDialogOpen = true;
+                        return;
+                    }
+
+                    if (Axes.DetermineIfThroughPole(physicalTarget[0], physicalTarget[1]))
+                    {
+                        _returnDialogContent = new HomeSettingsDialog();
+                        DialogMsg = $"{Application.Current.Resources["homeSettingsParkThroughPole"]}";
+                        DialogCaption = $"{Application.Current.Resources["exError"]}";
+                        DialogContent = new DialogOK();
+                        IsDialogOpen = true;
+                        return;
+                    }
                 }
 
                 var existingHomePark = ParkPositionViewModel.Instance.Positions

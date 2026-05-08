@@ -13,15 +13,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Windows;
-using System.Windows.Input;
 using ASCOM.DeviceInterface;
 using GS.Principles;
 using GS.Server.Controls.Dialogs;
@@ -30,7 +21,17 @@ using GS.Server.Pulses;
 using GS.Server.SkyTelescope;
 using GS.Shared;
 using GS.Shared.Command;
+using MaterialDesignColors;
 using MaterialDesignThemes.Wpf;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
 using NativeMethods = GS.Server.Helpers.NativeMethods;
 
 namespace GS.Server.Windows
@@ -63,6 +64,17 @@ namespace GS.Server.Windows
                     ScreenEnabled = SkyServer.IsMountRunning;
                     HcWinVisibility = false;
                     TopMost = true;
+
+                    SetMainColors();
+                    BgColorE = PrimaryColor;
+                    BgColorW = PrimaryColor;
+                    BgColorN = PrimaryColor;
+                    BgColorS = PrimaryColor;
+                    BgColorNe = PrimaryColor;
+                    BgColorNw = PrimaryColor;
+                    BgColorSe = PrimaryColor;
+                    BgColorSw = PrimaryColor;
+                    BgColorStop = PrimaryColor;
                 }
 
             }
@@ -77,6 +89,138 @@ namespace GS.Server.Windows
         }
 
         #region ViewModel
+
+        private Brush AccentColor { get; set; }
+        private Brush PrimaryColor { get; set; }
+
+        private Brush _bgColorE;
+        public Brush BgColorE
+        {
+            get =>  _bgColorE;
+            set
+            {
+                _bgColorE = value;
+                OnPropertyChanged();
+            }
+        }
+        private Brush _bgColorW;
+        public Brush BgColorW
+        {
+            get =>  _bgColorW;
+            set
+            {
+                _bgColorW = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorN;
+        public Brush BgColorN
+        {
+            get =>  _bgColorN;
+            set
+            {
+                _bgColorN = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorS;
+        public Brush BgColorS
+        {
+            get =>  _bgColorS;
+            set
+            {
+                _bgColorS = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorNe;
+        public Brush BgColorNe
+        {
+            get =>  _bgColorNe;
+            set
+            {
+                _bgColorNe = value;
+                OnPropertyChanged();
+            }
+        }
+        
+        private Brush _bgColorNw;
+        public Brush BgColorNw
+        {
+            get =>  _bgColorNw;
+            set
+            {
+                _bgColorNw = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorSe;
+        public Brush BgColorSe
+        {
+            get =>  _bgColorSe;
+            set
+            {
+                _bgColorSe = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorSw;
+        public Brush BgColorSw
+        {
+            get =>  _bgColorSw;
+            set
+            {
+                _bgColorSw = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private Brush _bgColorStop;
+        public Brush BgColorStop
+        {
+            get =>  _bgColorStop;
+            set
+            {
+                _bgColorStop = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void SetMainColors()
+        {
+            // set up accent color
+            var primaryColor = Settings.Settings.PrimaryColor;
+            if (!string.IsNullOrEmpty(primaryColor))
+            {
+                var swatches = new SwatchesProvider().Swatches;
+                foreach (var swatch in swatches)
+                {
+                    if (swatch.Name != primaryColor) continue;
+                    var converter = new BrushConverter();
+                    var primaryBrush = (Brush)converter.ConvertFromString(swatch.ExemplarHue.Color.ToString());
+                    PrimaryColor = primaryBrush;
+                }
+            }
+
+            // set up accent color
+            var accentColor = Settings.Settings.AccentColor;
+            if (!string.IsNullOrEmpty(accentColor))
+            {
+                var swatches = new SwatchesProvider().Swatches;
+                foreach (var swatch in swatches)
+                {
+                    if (swatch.Name != accentColor) continue;
+                    var converter = new BrushConverter();
+                    var accentbrush = (Brush)converter.ConvertFromString(swatch.ExemplarHue.Color.ToString());
+                    AccentColor = accentbrush;
+                }
+            }
+        }
 
         private string _title;
         public string Title
@@ -754,6 +898,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorW = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -776,6 +921,7 @@ namespace GS.Server.Windows
                 };
                 MonitorLog.LogToMonitor(monitorItem);
 
+                BgColorW = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -800,6 +946,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorW = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneRa);
             }
             catch (Exception ex)
@@ -819,7 +966,7 @@ namespace GS.Server.Windows
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
-        }
+        } 
 
         private ICommand _hcMouseDownRightCommand;
         public ICommand HcMouseDownRightCommand
@@ -840,6 +987,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorE = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -862,6 +1010,7 @@ namespace GS.Server.Windows
                 };
                 MonitorLog.LogToMonitor(monitorItem);
 
+                BgColorE = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -886,6 +1035,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorE = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneRa);
             }
             catch (Exception ex)
@@ -926,6 +1076,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorN = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -948,6 +1099,7 @@ namespace GS.Server.Windows
                 };
                 MonitorLog.LogToMonitor(monitorItem);
 
+                BgColorN = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -972,6 +1124,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorN = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
             }
             catch (Exception ex)
@@ -1012,6 +1165,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorS = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -1034,6 +1188,7 @@ namespace GS.Server.Windows
                 };
                 MonitorLog.LogToMonitor(monitorItem);
 
+                BgColorS = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -1058,6 +1213,7 @@ namespace GS.Server.Windows
         {
             try
             {
+                BgColorS = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
             }
             catch (Exception ex)
@@ -1097,7 +1253,15 @@ namespace GS.Server.Windows
         {
             try
             {
-                //_ctsSpiral?.Cancel();
+                BgColorStop = AccentColor;
+                BgColorE = PrimaryColor;
+                BgColorW = PrimaryColor;
+                BgColorN = PrimaryColor;
+                BgColorS = PrimaryColor;
+                BgColorNe = PrimaryColor;
+                BgColorNw = PrimaryColor;
+                BgColorSe = PrimaryColor;
+                BgColorSw = PrimaryColor;
                 SkyServer.AbortSlew(true);
             }
             catch (Exception ex)
@@ -1113,26 +1277,92 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+                BgColorE = PrimaryColor;
+                BgColorW = PrimaryColor;
+                BgColorN = PrimaryColor;
+                BgColorS = PrimaryColor;
+                BgColorNe = PrimaryColor;
+                BgColorNw = PrimaryColor;
+                BgColorSe = PrimaryColor;
+                BgColorSw = PrimaryColor;
+                BgColorStop = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseDownNECommand;
-        public ICommand HcMouseDownNECommand
+        private ICommand _hcMouseUpStopCommand;
+        public ICommand HcMouseUpStopCommand
         {
             get
             {
-                var command = _hcMouseDownNECommand;
-                if (command != null) return command;
-                return _hcMouseDownNECommand = new RelayCommand(param => HcMouseDownNE());
+                var command = _hcMouseUpStopCommand;
+                if (command != null)
+                {
+                    return command;
+                }
+
+                return _hcMouseUpStopCommand = new RelayCommand(param => HcMouseUpStop());
             }
-            set => _hcMouseDownNECommand = value;
+            set => _hcMouseUpStopCommand = value;
         }
-        private void HcMouseDownNE()
+        private void HcMouseUpStop()
         {
             try
             {
+                BgColorE = PrimaryColor;
+                BgColorW = PrimaryColor;
+                BgColorN = PrimaryColor;
+                BgColorS = PrimaryColor;
+                BgColorNe = PrimaryColor;
+                BgColorNw = PrimaryColor;
+                BgColorSe = PrimaryColor;
+                BgColorSw = PrimaryColor;
+                BgColorStop = PrimaryColor;
+            }
+            catch (Exception ex)
+            {
+                var monitorItem = new MonitorEntry
+                {
+                    Datetime = HiResDateTime.UtcNow,
+                    Device = MonitorDevice.Ui,
+                    Category = MonitorCategory.Interface,
+                    Type = MonitorType.Error,
+                    Method = MethodBase.GetCurrentMethod()?.Name,
+                    Thread = Thread.CurrentThread.ManagedThreadId,
+                    Message = $"{ex.Message}|{ex.StackTrace}"
+                };
+                MonitorLog.LogToMonitor(monitorItem);
+                BgColorE = PrimaryColor;
+                BgColorW = PrimaryColor;
+                BgColorN = PrimaryColor;
+                BgColorS = PrimaryColor;
+                BgColorNe = PrimaryColor;
+                BgColorNw = PrimaryColor;
+                BgColorSe = PrimaryColor;
+                BgColorSw = PrimaryColor;
+                BgColorStop = PrimaryColor;
+                SkyServer.AlertState = true;
+                OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
+            }
+        }
+
+        private ICommand _hcMouseDownNeCommand;
+        public ICommand HcMouseDownNeCommand
+        {
+            get
+            {
+                var command = _hcMouseDownNeCommand;
+                if (command != null) return command;
+                return _hcMouseDownNeCommand = new RelayCommand(param => HcMouseDownNe());
+            }
+            set => _hcMouseDownNeCommand = value;
+        }
+        private void HcMouseDownNe()
+        {
+            try
+            {
+                BgColorNe = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -1143,7 +1373,7 @@ namespace GS.Server.Windows
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewNorthEast :
                            ns && !ew ? SlewDirection.SlewSouthEast :
-                          !ns &&  ew ? SlewDirection.SlewNorthWest :
+                          !ns && ew ? SlewDirection.SlewNorthWest :
                                        SlewDirection.SlewSouthWest);
             }
             catch (Exception ex)
@@ -1159,26 +1389,29 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+
+                BgColorNe = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseUpNECommand;
-        public ICommand HcMouseUpNECommand
+        private ICommand _hcMouseUpNeCommand;
+        public ICommand HcMouseUpNeCommand
         {
             get
             {
-                var command = _hcMouseUpNECommand;
+                var command = _hcMouseUpNeCommand;
                 if (command != null) return command;
-                return _hcMouseUpNECommand = new RelayCommand(param => HcMouseUpNE());
+                return _hcMouseUpNeCommand = new RelayCommand(param => HcMouseUpNe());
             }
-            set => _hcMouseUpNECommand = value;
+            set => _hcMouseUpNeCommand = value;
         }
-        private void HcMouseUpNE()
+        private void HcMouseUpNe()
         {
             try
             {
+                BgColorNe = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -1200,21 +1433,22 @@ namespace GS.Server.Windows
             }
         }
 
-        private ICommand _hcMouseDownNWCommand;
-        public ICommand HcMouseDownNWCommand
+        private ICommand _hcMouseDownNwCommand;
+        public ICommand HcMouseDownNwCommand
         {
             get
             {
-                var command = _hcMouseDownNWCommand;
+                var command = _hcMouseDownNwCommand;
                 if (command != null) return command;
-                return _hcMouseDownNWCommand = new RelayCommand(param => HcMouseDownNW());
+                return _hcMouseDownNwCommand = new RelayCommand(param => HcMouseDownNw());
             }
-            set => _hcMouseDownNWCommand = value;
+            set => _hcMouseDownNwCommand = value;
         }
-        private void HcMouseDownNW()
+        private void HcMouseDownNw()
         {
             try
             {
+                BgColorNw = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -1225,7 +1459,7 @@ namespace GS.Server.Windows
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewNorthWest :
                            ns && !ew ? SlewDirection.SlewSouthWest :
-                          !ns &&  ew ? SlewDirection.SlewNorthEast :
+                          !ns && ew ? SlewDirection.SlewNorthEast :
                                        SlewDirection.SlewSouthEast);
             }
             catch (Exception ex)
@@ -1241,26 +1475,29 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+
+                BgColorNw = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseUpNWCommand;
-        public ICommand HcMouseUpNWCommand
+        private ICommand _hcMouseUpNwCommand;
+        public ICommand HcMouseUpNwCommand
         {
             get
             {
-                var command = _hcMouseUpNWCommand;
+                var command = _hcMouseUpNwCommand;
                 if (command != null) return command;
-                return _hcMouseUpNWCommand = new RelayCommand(param => HcMouseUpNW());
+                return _hcMouseUpNwCommand = new RelayCommand(param => HcMouseUpNw());
             }
-            set => _hcMouseUpNWCommand = value;
+            set => _hcMouseUpNwCommand = value;
         }
-        private void HcMouseUpNW()
+        private void HcMouseUpNw()
         {
             try
             {
+                BgColorNw = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -1277,26 +1514,28 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseDownSECommand;
-        public ICommand HcMouseDownSECommand
+        private ICommand _hcMouseDownSeCommand;
+        public ICommand HcMouseDownSeCommand
         {
             get
             {
-                var command = _hcMouseDownSECommand;
+                var command = _hcMouseDownSeCommand;
                 if (command != null) return command;
-                return _hcMouseDownSECommand = new RelayCommand(param => HcMouseDownSE());
+                return _hcMouseDownSeCommand = new RelayCommand(param => HcMouseDownSe());
             }
-            set => _hcMouseDownSECommand = value;
+            set => _hcMouseDownSeCommand = value;
         }
-        private void HcMouseDownSE()
+        private void HcMouseDownSe()
         {
             try
             {
+                BgColorSe = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -1307,7 +1546,7 @@ namespace GS.Server.Windows
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewSouthEast :
                            ns && !ew ? SlewDirection.SlewNorthEast :
-                          !ns &&  ew ? SlewDirection.SlewSouthWest :
+                          !ns && ew ? SlewDirection.SlewSouthWest :
                                        SlewDirection.SlewNorthWest);
             }
             catch (Exception ex)
@@ -1323,26 +1562,29 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+
+                BgColorSe = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseUpSECommand;
-        public ICommand HcMouseUpSECommand
+        private ICommand _hcMouseUpSeCommand;
+        public ICommand HcMouseUpSeCommand
         {
             get
             {
-                var command = _hcMouseUpSECommand;
+                var command = _hcMouseUpSeCommand;
                 if (command != null) return command;
-                return _hcMouseUpSECommand = new RelayCommand(param => HcMouseUpSE());
+                return _hcMouseUpSeCommand = new RelayCommand(param => HcMouseUpSe());
             }
-            set => _hcMouseUpSECommand = value;
+            set => _hcMouseUpSeCommand = value;
         }
-        private void HcMouseUpSE()
+        private void HcMouseUpSe()
         {
             try
             {
+                BgColorSe = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -1364,21 +1606,22 @@ namespace GS.Server.Windows
             }
         }
 
-        private ICommand _hcMouseDownSWCommand;
-        public ICommand HcMouseDownSWCommand
+        private ICommand _hcMouseDownSwCommand;
+        public ICommand HcMouseDownSwCommand
         {
             get
             {
-                var command = _hcMouseDownSWCommand;
+                var command = _hcMouseDownSwCommand;
                 if (command != null) return command;
-                return _hcMouseDownSWCommand = new RelayCommand(param => HcMouseDownSW());
+                return _hcMouseDownSwCommand = new RelayCommand(param => HcMouseDownSw());
             }
-            set => _hcMouseDownSWCommand = value;
+            set => _hcMouseDownSwCommand = value;
         }
-        private void HcMouseDownSW()
+        private void HcMouseDownSw()
         {
             try
             {
+                BgColorSw = AccentColor;
                 if (SkyServer.AtPark)
                 {
                     _skyTelescopeVm.BlinkParked();
@@ -1405,26 +1648,29 @@ namespace GS.Server.Windows
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+
+                BgColorSw = PrimaryColor;
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
         }
 
-        private ICommand _hcMouseUpSWCommand;
-        public ICommand HcMouseUpSWCommand
+        private ICommand _hcMouseUpSwCommand;
+        public ICommand HcMouseUpSwCommand
         {
             get
             {
-                var command = _hcMouseUpSWCommand;
+                var command = _hcMouseUpSwCommand;
                 if (command != null) return command;
-                return _hcMouseUpSWCommand = new RelayCommand(param => HcMouseUpSW());
+                return _hcMouseUpSwCommand = new RelayCommand(param => HcMouseUpSw());
             }
-            set => _hcMouseUpSWCommand = value;
+            set => _hcMouseUpSwCommand = value;
         }
-        private void HcMouseUpSW()
+        private void HcMouseUpSw()
         {
             try
             {
+                BgColorSw = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -1581,7 +1827,6 @@ namespace GS.Server.Windows
                     throw new ArgumentOutOfRangeException();
             }
         }
-
         
         private ICommand _openHcOptionsDialogCmd;
         public ICommand OpenHcOptionsDialogCmd
@@ -1817,7 +2062,7 @@ namespace GS.Server.Windows
         private static void HideMouse()
         {
             var point = NativeMethods.GetCursorPosition();
-            var r = new Rectangle((int)point.X, (int)point.Y, (int)point.X + 2, (int)point.Y + 2);
+            var r = new System.Drawing.Rectangle((int)point.X, (int)point.Y, (int)point.X + 2, (int)point.Y + 2);
             NativeMethods.ClipCursor(ref r);
         }
 

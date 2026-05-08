@@ -1172,57 +1172,57 @@ namespace GS.Server.GamePad
                     case "northeast":
                         if (value)
                         {
-                            if (_skyTelescopeVM.HcMouseDownNECommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseDownNECommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseDownNeCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseDownNeCommand.Execute(null);
                             returnId = id;
                             break;
                         }
                         else
                         {
-                            if (_skyTelescopeVM.HcMouseUpNECommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseUpNECommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseUpNeCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseUpNeCommand.Execute(null);
                             break;
                         }
                     case "northwest":
                         if (value)
                         {
-                            if (_skyTelescopeVM.HcMouseDownNWCommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseDownNWCommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseDownNwCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseDownNwCommand.Execute(null);
                             returnId = id;
                             break;
                         }
                         else
                         {
-                            if (_skyTelescopeVM.HcMouseUpNWCommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseUpNWCommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseUpNwCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseUpNwCommand.Execute(null);
                             break;
                         }
                     case "southeast":
                         if (value)
                         {
-                            if (_skyTelescopeVM.HcMouseDownSECommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseDownSECommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseDownSeCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseDownSeCommand.Execute(null);
                             returnId = id;
                             break;
                         }
                         else
                         {
-                            if (_skyTelescopeVM.HcMouseUpSECommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseUpSECommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseUpSeCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseUpSeCommand.Execute(null);
                             break;
                         }
                     case "southwest":
                         if (value)
                         {
-                            if (_skyTelescopeVM.HcMouseDownSWCommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseDownSWCommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseDownSwCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseDownSwCommand.Execute(null);
                             returnId = id;
                             break;
                         }
                         else
                         {
-                            if (_skyTelescopeVM.HcMouseUpSWCommand.CanExecute(null))
-                                _skyTelescopeVM.HcMouseUpSWCommand.Execute(null);
+                            if (_skyTelescopeVM.HcMouseUpSwCommand.CanExecute(null))
+                                _skyTelescopeVM.HcMouseUpSwCommand.Execute(null);
                             break;
                         }
                     case "speedup":

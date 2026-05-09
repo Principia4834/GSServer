@@ -20,7 +20,7 @@
             RotateTransform3D / AxisAngleRotation3D are Freezables with no governing
             FrameworkElement, causing WPF binding Error 2 with plain {Binding}.
             Bindings on those elements use:
-                {Binding Source={StaticResource ViewModelProxy}, Path=Data.PropertyName}
+            {Binding Source={StaticResource ViewModelProxy}, Path=Data.PropertyName}
             which supplies an explicit Source and bypasses the broken lookup.
         -->
         <controls:BindingProxy x:Key="ViewModelProxy" Data="{Binding}" />

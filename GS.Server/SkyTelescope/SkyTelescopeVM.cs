@@ -157,6 +157,7 @@ namespace GS.Server.SkyTelescope
                     IsLimits = SkySettings.LimitsOn;
                     ConnectButtonContent = Application.Current.Resources["skyConnect"].ToString();
                     VoiceState = Settings.Settings.VoiceActive;
+                    HcOneClickStart = SkySettings.HcOneClickStart;
 
                     if (AtPark)
                     {
@@ -244,15 +245,7 @@ namespace GS.Server.SkyTelescope
                     SetShowUI();
 
                     SetMainColors();
-                    BgColorE = PrimaryColor;
-                    BgColorW = PrimaryColor;
-                    BgColorN = PrimaryColor;
-                    BgColorS = PrimaryColor;
-                    BgColorNe = PrimaryColor;
-                    BgColorNw = PrimaryColor;
-                    BgColorSe = PrimaryColor;
-                    BgColorSw = PrimaryColor;
-                    BgColorStop = PrimaryColor;
+                    ResetHcButtonColors();
 
                     HcWinVisibility = true;
                     ModelWinVisibility = true;
@@ -519,6 +512,9 @@ namespace GS.Server.SkyTelescope
                  {
                      case "HcSpeed":
                          HcSpeed = (double)SkySettings.HcSpeed;
+                         break;
+                     case "HcOneClickStart":
+                         HcOneClickStart = SkySettings.HcOneClickStart;
                          break;
                      case "Longitude":
                          UpdateLongitude();
@@ -4564,6 +4560,20 @@ namespace GS.Server.SkyTelescope
                 OnPropertyChanged();
             }
         }
+        
+        private bool _hcOneClickStart;
+        public bool HcOneClickStart
+        {
+            get => _hcOneClickStart;
+            set
+            {
+                _hcOneClickStart = value;
+                SkySettings.HcOneClickStart = _hcOneClickStart;
+                OnPropertyChanged();
+            }
+        }
+        public HcOneClickType HcOneClickStop { get; set; }
+
         public bool FlipNs
         {
             get => SkySettings.HcFlipNs;
@@ -4573,7 +4583,6 @@ namespace GS.Server.SkyTelescope
                 OnPropertyChanged();
             }
         }
-
         public bool FlipEw
         {
             get => SkySettings.HcFlipEw;
@@ -4705,7 +4714,6 @@ namespace GS.Server.SkyTelescope
                     throw new ArgumentOutOfRangeException();
             }
         }
-
         public HcMode HcMode
         {
             get => SkySettings.HcMode;
@@ -4829,6 +4837,8 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+
+                if(OneClickDownCheck(HcOneClickType.Left)){return;}
                 StartSlew(FlipEw && EwEnabled ? SlewDirection.SlewRight : SlewDirection.SlewLeft);
             }
             catch (Exception ex)
@@ -4870,6 +4880,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Left)){return;}
                 BgColorW = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -4918,6 +4929,8 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+
+                if(OneClickDownCheck(HcOneClickType.Right)){return;}
                 StartSlew(FlipEw && EwEnabled ? SlewDirection.SlewLeft : SlewDirection.SlewRight);
             }
             catch (Exception ex)
@@ -4959,6 +4972,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Right)){return;}
                 BgColorE = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneRa);
             }
@@ -5007,6 +5021,8 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+
+                if(OneClickDownCheck(HcOneClickType.Up)){return;}
                 StartSlew(FlipNs && NsEnabled ? SlewDirection.SlewDown : SlewDirection.SlewUp);
             }
             catch (Exception ex)
@@ -5048,6 +5064,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Up)){return;}
                 BgColorN = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
             }
@@ -5096,6 +5113,7 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+                if(OneClickDownCheck(HcOneClickType.Down)){return;}
                 StartSlew(FlipNs && NsEnabled ? SlewDirection.SlewUp : SlewDirection.SlewDown);
             }
             catch (Exception ex)
@@ -5137,6 +5155,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Down)){return;}
                 BgColorS = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
             }
@@ -5178,14 +5197,6 @@ namespace GS.Server.SkyTelescope
             try
             {
                 BgColorStop = AccentColor;
-                BgColorE = PrimaryColor;
-                BgColorW = PrimaryColor;
-                BgColorN = PrimaryColor;
-                BgColorS = PrimaryColor;
-                BgColorNe = PrimaryColor;
-                BgColorNw = PrimaryColor;
-                BgColorSe = PrimaryColor;
-                BgColorSw = PrimaryColor;
                 SkyServer.AbortSlew(true);
             }
             catch (Exception ex)
@@ -5201,15 +5212,7 @@ namespace GS.Server.SkyTelescope
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
-                BgColorE = PrimaryColor;
-                BgColorW = PrimaryColor;
-                BgColorN = PrimaryColor;
-                BgColorS = PrimaryColor;
-                BgColorNe = PrimaryColor;
-                BgColorNw = PrimaryColor;
-                BgColorSe = PrimaryColor;
-                BgColorSw = PrimaryColor;
-                BgColorStop = PrimaryColor;
+                ResetHcButtonColors();
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -5234,15 +5237,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
-                BgColorE = PrimaryColor;
-                BgColorW = PrimaryColor;
-                BgColorN = PrimaryColor;
-                BgColorS = PrimaryColor;
-                BgColorNe = PrimaryColor;
-                BgColorNw = PrimaryColor;
-                BgColorSe = PrimaryColor;
-                BgColorSw = PrimaryColor;
-                BgColorStop = PrimaryColor;
+                ResetHcButtonColors();
             }
             catch (Exception ex)
             {
@@ -5257,15 +5252,7 @@ namespace GS.Server.SkyTelescope
                     Message = $"{ex.Message}|{ex.StackTrace}"
                 };
                 MonitorLog.LogToMonitor(monitorItem);
-                BgColorE = PrimaryColor;
-                BgColorW = PrimaryColor;
-                BgColorN = PrimaryColor;
-                BgColorS = PrimaryColor;
-                BgColorNe = PrimaryColor;
-                BgColorNw = PrimaryColor;
-                BgColorSe = PrimaryColor;
-                BgColorSw = PrimaryColor;
-                BgColorStop = PrimaryColor;
+                ResetHcButtonColors();
                 SkyServer.AlertState = true;
                 OpenDialog(ex.Message, $"{Application.Current.Resources["exError"]}");
             }
@@ -5297,6 +5284,7 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+                if(OneClickDownCheck(HcOneClickType.Ne)){return;}
                 var ns = FlipNs && NsEnabled;
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewNorthEast :
@@ -5342,6 +5330,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Ne)){return;}
                 BgColorNe = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
@@ -5390,6 +5379,7 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+                if(OneClickDownCheck(HcOneClickType.Nw)){return;}
                 var ns = FlipNs && NsEnabled;
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewNorthWest :
@@ -5435,6 +5425,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Nw)){return;}
                 BgColorNw = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
@@ -5483,6 +5474,7 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+                if(OneClickDownCheck(HcOneClickType.Se)){return;}
                 var ns = FlipNs && NsEnabled;
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewSouthEast :
@@ -5528,6 +5520,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Se)){return;}
                 BgColorSe = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
@@ -5576,6 +5569,7 @@ namespace GS.Server.SkyTelescope
                     Synthesizer.Speak(Application.Current.Resources["vceParked"].ToString());
                     return;
                 }
+                if(OneClickDownCheck(HcOneClickType.Sw)){return;}
                 var ns = FlipNs && NsEnabled;
                 var ew = FlipEw && EwEnabled;
                 StartSlew(!ns && !ew ? SlewDirection.SlewSouthWest :
@@ -5621,6 +5615,7 @@ namespace GS.Server.SkyTelescope
         {
             try
             {
+                if(OneClickUpCheck(HcOneClickType.Sw)){return;}
                 BgColorSw = PrimaryColor;
                 StartSlew(SlewDirection.SlewNoneDec);
                 StartSlew(SlewDirection.SlewNoneRa);
@@ -5862,7 +5857,92 @@ namespace GS.Server.SkyTelescope
                     throw new ArgumentOutOfRangeException();
             }
         }
+        private bool OneClickDownCheck(HcOneClickType a)
+        {
+            var ret = false;
+            if (HcOneClickStart)
+            {
+                if (HcOneClickStop != HcOneClickType.Na)
+                {
+                    HcOneClickSwitch();
+                    ret = true;
+                }
+                else
+                {
+                    HcOneClickStop = a;    
+                }
+            }
+            return ret;
+        }
+        private bool OneClickUpCheck(HcOneClickType a)
+        {
+            var ret = false;
+            if (HcOneClickStart)
+            {
+                if (HcOneClickStop == a)
+                {
+                    ret = true;
+                }
+                else
+                {
+                    HcOneClickStop = HcOneClickType.Na;   
+                }
+            }
+            return ret;
+        }
+        private void ResetHcButtonColors()
+        {
+            BgColorE = PrimaryColor;
+            BgColorW = PrimaryColor;
+            BgColorN = PrimaryColor;
+            BgColorS = PrimaryColor;
+            BgColorNe = PrimaryColor;
+            BgColorNw = PrimaryColor;
+            BgColorSe = PrimaryColor;
+            BgColorSw = PrimaryColor;
+            BgColorStop = PrimaryColor;
+            HcOneClickStop = HcOneClickType.Na;
+        }
+        private void HcOneClickSwitch()
+        {
+            var t = HcOneClickStop;
+            HcOneClickStop = HcOneClickType.Na;
 
+            switch (t)
+            {
+                case HcOneClickType.Up:
+                    HcMouseUpUp();
+                    break;
+                case HcOneClickType.Down:
+                    HcMouseUpDown();
+                    break;
+                case HcOneClickType.Left:
+                    HcMouseUpLeft();
+                    break;
+                case HcOneClickType.Right:
+                    HcMouseUpRight();
+                    break;
+                case HcOneClickType.Ne:
+                    HcMouseUpNe();
+                    break;
+                case HcOneClickType.Nw:
+                    HcMouseUpNw();
+                    break;
+                case HcOneClickType.Se:
+                    HcMouseUpSe();
+                    break;
+                case HcOneClickType.Sw:
+                    HcMouseUpSw();
+                    break;
+                case HcOneClickType.Stop:
+                    HcMouseUpStop();
+                    break;
+                case HcOneClickType.Na:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
         #endregion
 
         #region HC Locked Mouse

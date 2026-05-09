@@ -1182,6 +1182,20 @@ namespace GS.Server.SkyTelescope
             }
         }
 
+        private static bool _hcOneClickStart;
+        public static bool HcOneClickStart
+        {
+            get => _hcOneClickStart;
+            set
+            {
+                if (_hcOneClickStart == value) return;
+                _hcOneClickStart = value;
+                Properties.SkyTelescope.Default.HcOneClickStart = value;
+                LogSetting(MethodBase.GetCurrentMethod()?.Name, $"{value}");
+                OnStaticPropertyChanged();
+            }
+        }
+
         private static List<HcPulseGuide> _hcPulseGuides;
         public static List<HcPulseGuide> HcPulseGuides
         {
@@ -2344,6 +2358,7 @@ namespace GS.Server.SkyTelescope
             GuideRateOffsetY = Properties.SkyTelescope.Default.GuideRateOffsetY;
             GuideRateOffsetX = Properties.SkyTelescope.Default.GuideRateOffsetX;
             HcPulseGuides = JsonConvert.DeserializeObject<List<HcPulseGuide>>(Properties.SkyTelescope.Default.HcPulseGuides);
+            HcOneClickStart = Properties.SkyTelescope.Default.HcOneClickStart;
             HourAngleLimit = Properties.SkyTelescope.Default.HourAngleLimit;
             HomeWarning = Properties.SkyTelescope.Default.HomeWarning;
             HomeDialog = Properties.SkyTelescope.Default.HomeDialog;

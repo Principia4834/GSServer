@@ -1,61 +1,105 @@
 ﻿<UserControl x:Class="GS.Server.Controls.Dialogs.HcOptionsDialog"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        mc:Ignorable="d" 
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-         xmlns:skytelescope="clr-namespace:GS.Server.SkyTelescope"
-         xmlns:domain="clr-namespace:GS.Shared.Domain;assembly=GS.Shared"
-         d:DataContext="{d:DesignInstance Type=skytelescope:SkyTelescopeVm}">
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:domain="clr-namespace:GS.Shared.Domain;assembly=GS.Shared"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:skytelescope="clr-namespace:GS.Server.SkyTelescope"
+             d:DataContext="{d:DesignInstance Type=skytelescope:SkyTelescopeVm}"
+             mc:Ignorable="d">
     <GroupBox Header="{StaticResource optServerSettings}">
 
         <StackPanel Orientation="Vertical">
-                <!--Mode-->
-                <ComboBox materialDesign:HintAssist.Hint="{StaticResource hcMode}" ToolTip="{StaticResource hcTipMode}" Style="{StaticResource MaterialDesignFloatingHintComboBox}"
-                          ItemsSource="{Binding Source={domain:EnumBindingSource {x:Type skytelescope:HcMode}}}" >
-                    <ComboBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
-                        </ItemsPanelTemplate>
-                    </ComboBox.ItemsPanel>
-                    <ComboBox.Text>
-                        <Binding Path="HcMode" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"/>
-                    </ComboBox.Text>
-                </ComboBox>
-                <!--Flip-->
-                <StackPanel Margin="0,13,0,5" Background="{StaticResource  PrimaryHueMidBrush}" >
-                    <Label HorizontalAlignment="Center"  Content="{StaticResource hcFlip}"  />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <CheckBox HorizontalAlignment="Center" ToolTip="{StaticResource hcTipFlipEW}" IsChecked="{Binding FlipEw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding EwEnabled}" />
-                    <Label VerticalAlignment="Bottom" Content="{StaticResource hcFlipEW}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" >
-                    <CheckBox HorizontalAlignment="Center" ToolTip="{StaticResource hcTipFlipNS}" IsChecked="{Binding FlipNs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding NsEnabled}" />
-                    <Label VerticalAlignment="Bottom" HorizontalAlignment="Center" Content="{StaticResource hcFlipNS}"/>
-                </StackPanel>
-                <!--backlash-->
-                <StackPanel Margin="0,5,0,5" Background="{StaticResource  PrimaryHueMidBrush}" >
-                    <Label  HorizontalAlignment="Center" Content="{StaticResource hcBacklash}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" >
-                    <CheckBox HorizontalAlignment="Center" ToolTip="{StaticResource hcTipHcAntiBacklash}" IsChecked="{Binding HcAntiRa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label VerticalAlignment="Bottom" HorizontalAlignment="Center" Content="{StaticResource hcRa}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" >
-                    <CheckBox HorizontalAlignment="Center" ToolTip="{StaticResource hcTipHcAntiBacklash}" IsChecked="{Binding HcAntiDec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <Label VerticalAlignment="Bottom" Content="{StaticResource hcDec}"/>
-                </StackPanel>
-                <!--Direction Keys-->
-                <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Height="28">
-                    <CheckBox Height="25" Width="25" IsChecked="{Binding DisableKeysOnGoTo}" Style="{StaticResource MaterialDesignActionLightToggleButton}" ToolTip="{StaticResource DisableKeysOnGoToToolTip}"/>
-                    <TextBlock Margin="5,0,0,0" VerticalAlignment="Center" Text="{StaticResource DisableKeysOnGoTo}"/>
-                </StackPanel>
-                <!--Accept-->
-                <StackPanel Orientation="Horizontal" Margin="5,0,0,0" HorizontalAlignment="Center">
-                    <Button IsDefault="True" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding AcceptHcOptionsDialogCmd}" Content="{StaticResource diaAccept}"/>
-                </StackPanel>
+            <!--  Mode  -->
+            <ComboBox materialDesign:HintAssist.Hint="{StaticResource hcMode}"
+                      ItemsSource="{Binding Source={domain:EnumBindingSource {x:Type skytelescope:HcMode}}}"
+                      Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                      ToolTip="{StaticResource hcTipMode}">
+                <ComboBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel />
+                    </ItemsPanelTemplate>
+                </ComboBox.ItemsPanel>
+                <ComboBox.Text>
+                    <Binding Mode="TwoWay"
+                             Path="HcMode"
+                             UpdateSourceTrigger="PropertyChanged" />
+                </ComboBox.Text>
+            </ComboBox>
+            <!--  Flip  -->
+            <StackPanel Margin="0,13,0,5" Background="{StaticResource PrimaryHueMidBrush}">
+                <Label HorizontalAlignment="Center" Content="{StaticResource hcFlip}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox HorizontalAlignment="Center"
+                          IsChecked="{Binding FlipEw, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          IsEnabled="{Binding EwEnabled}"
+                          ToolTip="{StaticResource hcTipFlipEW}" />
+                <Label VerticalAlignment="Bottom" Content="{StaticResource hcFlipEW}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox HorizontalAlignment="Center"
+                          IsChecked="{Binding FlipNs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          IsEnabled="{Binding NsEnabled}"
+                          ToolTip="{StaticResource hcTipFlipNS}" />
+                <Label HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom"
+                       Content="{StaticResource hcFlipNS}" />
+            </StackPanel>
+            <!--  backlash  -->
+            <StackPanel Margin="0,5,0,5" Background="{StaticResource PrimaryHueMidBrush}">
+                <Label HorizontalAlignment="Center" Content="{StaticResource hcBacklash}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox HorizontalAlignment="Center"
+                          IsChecked="{Binding HcAntiRa, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ToolTip="{StaticResource hcTipHcAntiBacklash}" />
+                <Label HorizontalAlignment="Center"
+                       VerticalAlignment="Bottom"
+                       Content="{StaticResource hcRa}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <CheckBox HorizontalAlignment="Center"
+                          IsChecked="{Binding HcAntiDec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          ToolTip="{StaticResource hcTipHcAntiBacklash}" />
+                <Label VerticalAlignment="Bottom" Content="{StaticResource hcDec}" />
+            </StackPanel>
+            <!--  Direction Keys  -->
+            <StackPanel Height="28"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal">
+                <CheckBox Width="25"
+                          Height="25"
+                          IsChecked="{Binding DisableKeysOnGoTo}"
+                          Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                          ToolTip="{StaticResource DisableKeysOnGoToToolTip}" />
+                <TextBlock Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Text="{StaticResource DisableKeysOnGoTo}" />
+            </StackPanel>
+            <!--  Direction Keys  -->
+            <StackPanel Height="28"
+                        Margin="0,5,0,0"
+                        Orientation="Horizontal">
+                <CheckBox Width="25"
+                          Height="25"
+                          IsChecked="{Binding HcOneClickStart}"
+                          Style="{StaticResource MaterialDesignActionLightToggleButton}"
+                          ToolTip="{StaticResource lbOneClickStart}" />
+                <TextBlock Margin="5,0,0,0"
+                           VerticalAlignment="Center"
+                           Text="{StaticResource lbOneClickStart}" />
+            </StackPanel>
+            <!--  Accept  -->
+            <StackPanel Margin="5,0,0,0"
+                        HorizontalAlignment="Center"
+                        Orientation="Horizontal">
+                <Button Command="{Binding AcceptHcOptionsDialogCmd}"
+                        Content="{StaticResource diaAccept}"
+                        IsDefault="True"
+                        Style="{StaticResource MaterialDesignFlatButton}" />
+            </StackPanel>
         </StackPanel>
     </GroupBox>
 </UserControl>

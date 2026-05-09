@@ -24,6 +24,20 @@ namespace GS.Server.SkyTelescope
         Pulse
     }
 
+    public enum HcOneClickType
+    {
+        Up,
+        Down,
+        Right,
+        Left,
+        Ne,
+        Nw,
+        Se,
+        Sw,
+        Stop,
+        Na
+    }
+
     public enum SlewType
     {
         SlewNone,

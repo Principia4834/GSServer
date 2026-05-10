@@ -709,7 +709,7 @@ namespace GS.Server.GamePad
                                 {
                                     var pushed = povtocheck.Value == gamepadPovs[povtocheck.Key];
                                     var dir = PovDirection(povtocheck.Value);
-                                    var cmd = _gamePad.Get_KeyByValue("pov" + " " + dir + " " + povtocheck.Key);
+                                    var cmd = GetPovCommand(dir, povtocheck.Key);
                                     var id = DoGamePadCommand(povtocheck.Key, pushed, cmd);
                                     if (id == -1) povtocheck = new PovPair(-1, 0);
                                 }
@@ -722,7 +722,7 @@ namespace GS.Server.GamePad
                                     var newhit = new PovPair(i, gamepadPovs[i]);
                                     var dir = PovDirection(newhit.Value);
                                     var val = "pov" + " " + dir + " " + newhit.Key;
-                                    var cmd = _gamePad.Get_KeyByValue(val);
+                                    var cmd = GetPovCommand(dir, newhit.Key);
 
                                     if (key != null)
                                     {
@@ -2333,6 +2333,27 @@ namespace GS.Server.GamePad
                     return "northwest";
                 default:
                     return "";
+            }
+        }
+
+        private string GetPovCommand(string direction, int povIndex)
+        {
+            var indexedCommand = _gamePad.Get_KeyByValue("pov" + " " + direction + " " + povIndex);
+            if (!string.IsNullOrEmpty(indexedCommand))
+            {
+                return indexedCommand;
+            }
+
+            // Backward compatibility for older diagonal POV settings stored without an index.
+            switch (direction)
+            {
+                case "northeast":
+                case "northwest":
+                case "southeast":
+                case "southwest":
+                    return _gamePad.Get_KeyByValue("pov" + " " + direction);
+                default:
+                    return null;
             }
         }
 

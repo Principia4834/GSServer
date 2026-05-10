@@ -84,16 +84,16 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="northeast" Type="System.String" Scope="User">
-      <Value Profile="(Default)">pov northeast</Value>
+      <Value Profile="(Default)">pov northeast 0</Value>
     </Setting>
     <Setting Name="northwest" Type="System.String" Scope="User">
-      <Value Profile="(Default)">pov northwest</Value>
+      <Value Profile="(Default)">pov northwest 0</Value>
     </Setting>
     <Setting Name="southeast" Type="System.String" Scope="User">
-      <Value Profile="(Default)">pov southeast</Value>
+      <Value Profile="(Default)">pov southeast 0</Value>
     </Setting>
     <Setting Name="southwest" Type="System.String" Scope="User">
-      <Value Profile="(Default)">pov southwest</Value>
+      <Value Profile="(Default)">pov southwest 0</Value>
     </Setting>
   </Settings>
 </SettingsFile>

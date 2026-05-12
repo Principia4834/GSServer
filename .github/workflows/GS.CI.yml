@@ -68,7 +68,7 @@ jobs:
           dotnet nuget locals all --clear
           
       - name: Checkout
-        uses: actions/checkout@v4 #v3 to v4
+        uses: actions/checkout@v5 #v3 to v4
         with:
           fetch-depth: 0
           

@@ -52,8 +52,8 @@ jobs:
       matrix:
         configuration: [Debug,Release]
 
-    runs-on: windows-2025-vs2026 # For a list of available runner types, refer to 
-    # runs-on: windows-latest  # For a list of available runner types, refer to 
+    # runs-on: windows-2025-vs2026 # this was tested on 5/12/26
+    runs-on: windows-latest  # For a list of available runner types, refer to 
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
                              
     env:    

@@ -685,6 +685,8 @@ namespace GS.Server.SkyTelescope
             }
             AtPark = SkyServer.AtPark;
 
+            OnPropertyChanged(nameof(Observatories));
+
             // Settings drawer items
             string[] propertyList = { "ParkPositions",
                 "BaudRate", "SelectedDevice", "Mount", "EquatorialCoordinateType",
@@ -752,6 +754,9 @@ namespace GS.Server.SkyTelescope
                                     break;
                                 case "AtPark":
                                     AtPark = SkyServer.AtPark;
+                                    break;
+                                case "IsInFlipZone":
+                                    IsInFlipZone = SkyServer.IsInFlipZone;
                                     break;
                                 case "IsSlewing":
                                     IsSlewing = SkyServer.IsSlewing;
@@ -9332,6 +9337,20 @@ namespace GS.Server.SkyTelescope
             {
                 _flipOnGoto = value;
                 OnPropertyChanged();
+            }
+        }
+
+        private bool _isInFlipZone;
+        public bool IsInFlipZone
+        {
+            get => _isInFlipZone;
+            set
+            {
+                {
+                    if (IsInFlipZone == value) return;
+                    _isInFlipZone = value;
+                    OnPropertyChanged();
+                }
             }
         }
 

@@ -189,6 +189,7 @@ namespace GS.Server.SkyTelescope
         private static bool _isPulseGuidingRa;
         private static PierSide _isSideOfPier;
         private static bool _isSlewing;
+        private static bool _isInFlipZone;
         private static Exception _lastAutoHomeError;
         private static double _lha;
         private static bool _limitAlarm;
@@ -616,6 +617,21 @@ namespace GS.Server.SkyTelescope
                     Message = $"{value}|{_appAxes.Y}|{_appAxes.Y < 90 || _appAxes.Y.IsEqualTo(90, 0.0000000001)}|{_appAxes.Y > -90 || _appAxes.Y.IsEqualTo(-90, 0.0000000001)} "
                 };
                 MonitorLog.LogToMonitor(monitorItem);
+            }
+        }
+
+        /// <summary>
+        /// UI indicator for flip zone
+        /// </summary>
+        public static bool IsInFlipZone
+        {
+            get => _isInFlipZone;
+
+            private set
+            {
+                if (_isInFlipZone == value) { return; }
+                _isInFlipZone = value;
+                OnStaticPropertyChanged();
             }
         }
 
@@ -3030,6 +3046,18 @@ namespace GS.Server.SkyTelescope
         /// </summary>
         private static void CheckAxisLimits()
         {
+            // Update GEM flip zone flag - axis must be withing flip angle of the meridian (0 or 180 degrees)
+            var axisX = SouthernHemisphere ? -_appAxisX : _appAxisX;
+            if (SkySettings.AlignmentMode == AlignmentModes.algGermanPolar)
+            {
+                IsInFlipZone = (-SkySettings.HourAngleLimit <= axisX && axisX <= SkySettings.HourAngleLimit)
+                    || (180 - SkySettings.HourAngleLimit <= axisX && axisX <= 180 + SkySettings.HourAngleLimit);
+            }
+            else
+            {
+                IsInFlipZone = false;
+            }
+
             if (!SkySettings.LimitsOn) // if user shut off the Limits just return
             {
                 LimitAlarm = false;
@@ -3119,32 +3147,32 @@ namespace GS.Server.SkyTelescope
             // Horizon Limit Test
             if (SkySettings.HzLimitPark || SkySettings.HzLimitTracking) // Skip all if set to do nothing
             {
-                switch (SkySettings.AlignmentMode)
-                {
-                    case AlignmentModes.algAltAz:
-                        if ((Altitude <= SkySettings.AxisHzTrackingLimit 
-                             || Altitude <= SkySettings.AxisLowerLimitY
-                             || Altitude >= SkySettings.AxisUpperLimitY) && Tracking)
-                        {
-                            limitHit = true;
-                            horizonLimit = true;
-                        }
-                        break;
-                    case AlignmentModes.algPolar:
-                        if (Altitude <= SkySettings.AxisHzTrackingLimit && Tracking)
-                        {
-                            limitHit = true;
-                            horizonLimit = true;
-                        }
-                        break;
-                    case AlignmentModes.algGermanPolar:
-                        if (SideOfPier == PierSide.pierEast && Altitude <= SkySettings.AxisHzTrackingLimit && Tracking)
-                        {
-                            limitHit = true;
-                            horizonLimit = true;
-                        }
+            switch (SkySettings.AlignmentMode)
+            {
+                case AlignmentModes.algAltAz:
+                    if ((Altitude <= SkySettings.AxisHzTrackingLimit
+                         || Altitude <= SkySettings.AxisLowerLimitY
+                         || Altitude >= SkySettings.AxisUpperLimitY) && Tracking)
+                    {
+                        limitHit = true;
+                        horizonLimit = true;
+                    }
+                    break;
+                case AlignmentModes.algPolar:
+                    if (Altitude <= SkySettings.AxisHzTrackingLimit && Tracking)
+                    {
+                        limitHit = true;
+                        horizonLimit = true;
+                    }
+                    break;
+                case AlignmentModes.algGermanPolar:
+                    if (SideOfPier == PierSide.pierEast && Altitude <= SkySettings.AxisHzTrackingLimit && Tracking)
+                    {
+                        limitHit = true;
+                        horizonLimit = true;
+                    }
 
-                        break;
+                    break;
                 }
             }
 
@@ -6515,15 +6543,27 @@ namespace GS.Server.SkyTelescope
 
             // Start the go to and ALWAYS wait for the started event - IsSlewing will be set
             goToTask.Start();
-            goToStartedEvent.WaitOne(5000); // Timeout for the event to be set
+            var startedSignaled = goToStartedEvent.WaitOne(5000); // true if GoToAsync already called Set()
 
             if (!slewAsync) goToTask.Wait();
 
             // Only dispose if we created it internally
             if (externalSlewStartedEvent == null)
             {
-                goToStartedEvent.Dispose();
-                goToStartedEvent = null;
+                var eventToDispose = goToStartedEvent; // capture value safely
+
+                if (startedSignaled || goToTask.IsCompleted)
+                {
+                    eventToDispose.Dispose();
+                }
+                else
+                {
+                    goToTask.ContinueWith(
+                        _ => eventToDispose.Dispose(),
+                        CancellationToken.None,
+                        TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
+                }
             }
         }
 

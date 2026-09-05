@@ -15,9 +15,9 @@
         <domain:BoolToVisClapConverter x:Key="BoolToClap" />
 
         <Style x:Key="FlipRaisedDarkButtonStyle"
-           TargetType="{x:Type ButtonBase}"
-           BasedOn="{StaticResource MaterialDesignRaisedDarkButton}">
-            <!-- default -->
+               BasedOn="{StaticResource MaterialDesignRaisedDarkButton}"
+               TargetType="{x:Type ButtonBase}">
+            <!--  default  -->
             <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsInFlipZone}" Value="True">
@@ -170,15 +170,26 @@
                        CloseOnClickAway="True"
                        DialogContent="{Binding FlipContent}"
                        IsOpen="{Binding IsFlipDialogOpen}">
-            <Button Width="105"
-                    Height="25"
-                    Margin="0,3,0,0"
-                    Padding="-5"
-                    HorizontalAlignment="Left"
-                    Command="{Binding OpenFlipDialogCommand}"
-                    Content="{Binding FlipButtonContent}"
-                    Style="{StaticResource FlipRaisedDarkButtonStyle}"
-                    ToolTip="{Binding FlipButtonTip}" />
+            <md:Badged Badge="{Binding SopBadgeContent}" BadgePlacementMode="Right">
+                <md:Badged.Style>
+                    <Style TargetType="md:Badged">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSop}" Value="True">
+                                <Setter Property="BadgeBackground" Value="{StaticResource SecondaryHueMidBrush}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </md:Badged.Style>
+                <Button Width="105"
+                        Height="25"
+                        Margin="0,3,0,0"
+                        Padding="-5"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenFlipDialogCommand}"
+                        Content="{Binding FlipButtonContent}"
+                        Style="{StaticResource FlipRaisedDarkButtonStyle}"
+                        ToolTip="{Binding FlipButtonTip}" />
+            </md:Badged>
         </md:DialogHost>
         <md:DialogHost VerticalAlignment="Bottom"
                        DialogContent="{Binding AutoHomeContent}"

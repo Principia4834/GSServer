@@ -752,6 +752,9 @@ namespace GS.Server.SkyTelescope
                                 case "IsHome":
                                     IsHome = SkyServer.IsHome;
                                     break;
+                                case "IsSop":
+                                    IsSoP = SkyServer.IsSop;
+                                    break;
                                 case "AtPark":
                                     AtPark = SkyServer.AtPark;
                                     break;
@@ -3639,6 +3642,18 @@ namespace GS.Server.SkyTelescope
             {
                 if (HomeBadgeContent == value) return;
                 _homeBadgeContent = value;
+                OnPropertyChanged();
+            }
+        }
+        
+        private string _sopBadgeContent;
+        public string SopBadgeContent
+        {
+            get => _sopBadgeContent;
+            set
+            {
+                if (SopBadgeContent == value) return;
+                _sopBadgeContent = value;
                 OnPropertyChanged();
             }
         }
@@ -7266,6 +7281,19 @@ namespace GS.Server.SkyTelescope
                 if (IsHome == value) return;
                 _isHome = value;
                 HomeBadgeContent = value ? Application.Current.Resources["btnBadgeHome"].ToString() : "";
+                OnPropertyChanged();
+            }
+        }
+        
+        private bool _isSoP;
+        public bool IsSoP
+        {
+            get => _isSoP;
+            set
+            {
+                if (_isSoP == value) return;
+                _isSoP = value;
+                SopBadgeContent = value ? Application.Current.Resources["btnHintTracking"].ToString() : "";
                 OnPropertyChanged();
             }
         }

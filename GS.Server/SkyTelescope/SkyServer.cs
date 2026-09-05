@@ -189,6 +189,7 @@ namespace GS.Server.SkyTelescope
         private static bool _isPulseGuidingRa;
         private static PierSide _isSideOfPier;
         private static bool _isSlewing;
+        private static bool _isSop;
         private static bool _isInFlipZone;
         private static Exception _lastAutoHomeError;
         private static double _lha;
@@ -645,6 +646,20 @@ namespace GS.Server.SkyTelescope
             {
                 if (_isSlewing == value) { return; }
                 _isSlewing = value;
+                OnStaticPropertyChanged();
+            }
+        }
+        
+        /// <summary>
+        /// status for goto
+        /// </summary>
+        public static bool IsSop
+        {
+            get => _isSop;
+            private set
+            {
+                if (_isSop == value) { return; }
+                _isSop = value;
                 OnStaticPropertyChanged();
             }
         }
@@ -1288,6 +1303,7 @@ namespace GS.Server.SkyTelescope
                 };
                 if (IsWithinFlipLimits(Axes.AxesMountToApp(axes)))
                 {
+                    IsSop = true;
                     if (Tracking)
                     {
                         FlipOnNextGoto = true;
@@ -4204,6 +4220,7 @@ namespace GS.Server.SkyTelescope
                     Tracking = trackingState;
                     if (Tracking) Thread.Sleep(1500);
                     SlewState = SlewType.SlewNone;
+                    IsSop = false;
                     SpeakSlewEnd(startingState);
                     TrackingSpeak = true;
                 }
@@ -4225,6 +4242,7 @@ namespace GS.Server.SkyTelescope
                     SpeakSlewEnd(startingState);
                     Tracking = false;
                     TrackingSpeak = true;
+                    IsSop = false;
                 }
             }
             catch (Exception ex)
@@ -4261,6 +4279,7 @@ namespace GS.Server.SkyTelescope
                 }
 
                 SlewState = SlewType.SlewNone;
+                IsSop = false;
                 Tracking = trackingState;
                 // Some unknown exception
                 if (!cancelled)
@@ -6612,6 +6631,7 @@ namespace GS.Server.SkyTelescope
 
             SlewState = SlewType.SlewNone;
             Tracking = false;
+            IsSop = false;
             Synthesizer.Speak(Application.Current.Resources["vceStop"].ToString());
         }
 

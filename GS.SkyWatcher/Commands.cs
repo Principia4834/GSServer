@@ -1817,27 +1817,56 @@ namespace GS.SkyWatcher
         private static string ReceiveResponse()
         {
             // format "::e1\r=020883\r"
-            var mBuffer = new StringBuilder(15);
-            var startReading = false;
-
-            var sw = Stopwatch.StartNew();
-            var readTimeout = SkyQueue.Serial.ReadTimeout;
-            while (sw.ElapsedMilliseconds < readTimeout)
+            var receivedData = string.Empty;
+            try
             {
-                var data = SkyQueue.Serial.ReadExisting();
-                foreach (var byt in data)
+                receivedData = SkyQueue.Serial.ReadLine();
+                if (string.IsNullOrEmpty(receivedData)) return null;
+                if (receivedData[0] != '=' && receivedData[0] != '!')
                 {
-                    // this code order is important
-                    if (byt == '=' || byt == '!' || byt == EndChar) startReading = true;
-                    if ((byt == EndChar) && (mBuffer.Length == 0)) continue;
-                    if (startReading) mBuffer.Append(byt);
-                    if (byt != EndChar) continue;
-                    if (!startReading) continue;
-                    return mBuffer.ToString();
+                    // Read again after echo response from simplex mounts
+                    receivedData = SkyQueue.Serial.ReadLine();
                 }
-                Thread.Sleep(1);
+                else
+                {
+                    return receivedData;
+                }
+                if (string.IsNullOrEmpty(receivedData)) return null;
+                if (receivedData[0] != '=' && receivedData[0] != '!')
+                {
+                    return null;
+                }
+                else
+                {
+                    return receivedData;
+                }
             }
-            return null;
+            catch (TimeoutException ex)
+            {
+                return null;
+            }
+
+            //var mBuffer = new StringBuilder(15);
+            //var startReading = false;
+
+            //var sw = Stopwatch.StartNew();
+            //var readTimeout = SkyQueue.Serial.ReadTimeout;
+            //while (sw.ElapsedMilliseconds < readTimeout)
+            //{
+            //    var data = SkyQueue.Serial.ReadExisting();
+            //    foreach (var byt in data)
+            //    {
+            //        // this code order is important
+            //        if (byt == '=' || byt == '!' || byt == EndChar) startReading = true;
+            //        if ((byt == EndChar) && (mBuffer.Length == 0)) continue;
+            //        if (startReading) mBuffer.Append(byt);
+            //        if (byt != EndChar) continue;
+            //        if (!startReading) continue;
+            //        return mBuffer.ToString();
+            //    }
+            //    Thread.Sleep(1);
+            //}
+            //return null;
         }
 
         /// <summary>

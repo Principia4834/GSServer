@@ -39,6 +39,21 @@ namespace GS.Shared.Transport
             DtrEnable = options.HasFlag(SerialOptions.DtrEnable);
             RtsEnable = options.HasFlag(SerialOptions.RtsEnable);
             DiscardNull = options.HasFlag(SerialOptions.DiscardNull);
+            NewLine = "\r";
+        }
+
+        public new string ReadExisting()
+        {
+            return base.ReadExisting();
+        }
+
+        /// <summary>
+        /// Reads a line
+        /// </summary>
+        /// <returns>The line read.</returns>
+        public new string ReadLine()
+        {
+            return base.ReadLine();
         }
 
         /// <summary>

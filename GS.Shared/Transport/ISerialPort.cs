@@ -17,6 +17,8 @@ namespace GS.Shared.Transport
 
         string ReadExisting();
 
+        string ReadLine();
+
         void DiscardInBuffer();
 
         void DiscardOutBuffer();

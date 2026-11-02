@@ -21,6 +21,7 @@ namespace GS.Shared.Transport
         public bool IsOpen => Client.Connected;
         public void DiscardInBuffer(){}
         public void DiscardOutBuffer(){}
+        public string ReadLine()=> String.Empty;
         public void Open()
         {
             try

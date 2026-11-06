@@ -1043,6 +1043,21 @@ namespace GS.SkyWatcher
         }
 
         /// <summary>
+        /// Gets the high-resolution clock frequency in ticks per second.
+        /// </summary>
+        /// <param name="axis">AxisId.Axis1 or AxisId.Axis2</param>
+        internal long GetHighResolutionClockFrequency(AxisId axis)
+        {
+            var response = CmdToMount(axis, 'X', "0006");
+            var frequency = uint.Parse(response.Substring(1, 8), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            var msg = axis == AxisId.Axis1 ? ":X10006" : ":X20006";
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $"{msg}|{response}|{frequency}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return frequency;
+        }
+
+        /// <summary>
         /// Capture axes positions and timestamp. 8 hex for ra, 8 hex for dec, 16 hex in microseconds
         /// </summary>
         /// <param name="raw">process hex or not</param>
@@ -1494,6 +1509,100 @@ namespace GS.SkyWatcher
                 Message = $"{axis}|{msg}|Target|{targetInRadian}|Rate|{rateInRadian}|TSteps|{itargetInSteps}|RSteps|{irateInSteps}"
             };
             MonitorLog.LogToMonitor(monitorItem);
+        }
+
+        /// <summary>
+        /// Synchronizes both axes to positions and speeds.
+        /// </summary>
+        /// <param name="axis1Position">Axis 1 position in ticks</param>
+        /// <param name="axis1Speed">Axis 1 speed in ticks per 1024 seconds</param>
+        /// <param name="axis2Position">Axis 2 position in ticks</param>
+        /// <param name="axis2Speed">Axis 2 speed in ticks per 1024 seconds</param>
+        internal string SyncAxes_Advanced(int axis1Position, int axis1Speed, int axis2Position, int axis2Speed)
+        {
+            var cmdData = "06"
+                + axis1Position.ToString("X8", CultureInfo.InvariantCulture)
+                + axis1Speed.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Position.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Speed.ToString("X8", CultureInfo.InvariantCulture);
+            var response = CmdToMount(AxisId.Axis1, 'X', cmdData);
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $":X1{cmdData}|{response}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return response;
+        }
+
+        /// <summary>
+        /// Adds position offsets to both axis trajectories.
+        /// </summary>
+        /// <param name="axis1Offset">Axis 1 offset in ticks</param>
+        /// <param name="axis2Offset">Axis 2 offset in ticks</param>
+        internal string AddTrajectoryOffsets_Advanced(int axis1Offset, int axis2Offset)
+        {
+            var cmdData = "0A"
+                + axis1Offset.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Offset.ToString("X8", CultureInfo.InvariantCulture);
+            var response = CmdToMount(AxisId.Axis1, 'X', cmdData);
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $":X1{cmdData}|{response}|Offsets|{axis1Offset}|{axis2Offset}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return response;
+        }
+
+        /// <summary>
+        /// Sets the motor controller clock using a timestamp in microseconds.
+        /// </summary>
+        /// <param name="timestampMicroseconds">The timestamp to set</param>
+        internal string SetClock_Advanced(ulong timestampMicroseconds)
+        {
+            var cmdData = "0B" + timestampMicroseconds.ToString("X16", CultureInfo.InvariantCulture);
+            var response = CmdToMount(AxisId.Axis1, 'X', cmdData);
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $":X1{cmdData}|{response}|Timestamp|{timestampMicroseconds}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return response;
+        }
+
+        /// <summary>
+        /// Adds a position-and-speed tracepoint and starts trajectory tracking.
+        /// </summary>
+        /// <param name="timestampMicroseconds">Tracepoint timestamp in microseconds</param>
+        /// <param name="axis1Position">Axis 1 position in ticks</param>
+        /// <param name="axis2Position">Axis 2 position in ticks</param>
+        /// <param name="axis1Speed">Axis 1 speed in ticks per 1024 seconds</param>
+        /// <param name="axis2Speed">Axis 2 speed in ticks per 1024 seconds</param>
+        internal string AddTracepointWithSpeed_Advanced(ulong timestampMicroseconds, int axis1Position, int axis2Position, int axis1Speed, int axis2Speed)
+        {
+            var cmdData = "0D"
+                + timestampMicroseconds.ToString("X16", CultureInfo.InvariantCulture)
+                + axis1Position.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Position.ToString("X8", CultureInfo.InvariantCulture)
+                + axis1Speed.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Speed.ToString("X8", CultureInfo.InvariantCulture);
+            var response = CmdToMount(AxisId.Axis1, 'X', cmdData);
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $":X1{cmdData}|{response}|Position|{axis1Position}|{axis2Position}|Speed|{axis1Speed}|{axis2Speed}|Timestamp|{timestampMicroseconds}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return response;
+        }
+
+        /// <summary>
+        /// Adds a position-only tracepoint and starts trajectory tracking.
+        /// </summary>
+        /// <param name="timestampMicroseconds">Tracepoint timestamp in microseconds</param>
+        /// <param name="axis1Position">Axis 1 position in ticks</param>
+        /// <param name="axis2Position">Axis 2 position in ticks</param>
+        internal string AddTracepoint_Advanced(ulong timestampMicroseconds, int axis1Position, int axis2Position)
+        {
+            var cmdData = "0E"
+                + timestampMicroseconds.ToString("X16", CultureInfo.InvariantCulture)
+                + axis1Position.ToString("X8", CultureInfo.InvariantCulture)
+                + axis2Position.ToString("X8", CultureInfo.InvariantCulture);
+            var response = CmdToMount(AxisId.Axis1, 'X', cmdData);
+            var monitorItem = new MonitorEntry
+            { Datetime = HiResDateTime.UtcNow, Device = MonitorDevice.Telescope, Category = MonitorCategory.Mount, Type = MonitorType.Data, Method = MethodBase.GetCurrentMethod()?.Name, Thread = Thread.CurrentThread.ManagedThreadId, Message = $":X1{cmdData}|{response}|Position|{axis1Position}|{axis2Position}|Timestamp|{timestampMicroseconds}" };
+            MonitorLog.LogToMonitor(monitorItem);
+            return response;
         }
 
         #endregion
